@@ -1,92 +1,97 @@
 /**
- * Hook for injecting KaTeX support into HTML content
+ * Hook for injecting KaTeX support into HTML content.
+ * Pre-renders LaTeX math using the katex npm package (avoids CDN script loading issues in sandboxed iframes).
  */
+import katex from "katex";
+
 export function useKaTeXInjection() {
-  /**
-   * Inject KaTeX CSS and JS into HTML if not already present
-   */
   const injectKaTeX = (html: string): string => {
-    // Check if KaTeX is already included (case-insensitive)
-    const htmlLower = html.toLowerCase();
-    const hasKaTeX =
-      htmlLower.includes("katex.min.css") ||
-      htmlLower.includes("katex.min.js") ||
-      htmlLower.includes("katex@") ||
-      htmlLower.includes("cdn.jsdelivr.net/npm/katex") ||
-      htmlLower.includes("unpkg.com/katex");
+    // Step 1: Protect script, style, code, and pre blocks from math processing
+    const blocks: string[] = [];
+    let processed = html.replace(
+      /<(script|style|code|pre)[^>]*>[\s\S]*?<\/\1>/gi,
+      (match) => {
+        blocks.push(match);
+        return `<!--MATHPROTECT${blocks.length - 1}-->`;
+      },
+    );
 
-    // Even if KaTeX CDN is already present, we still need our init script
-    // to configure proper delimiters (default auto-render doesn't support $...$)
-    const cdnAlreadyPresent = hasKaTeX;
+    // Step 2: Render display math $$...$$ (must come before single $)
+    processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+      try {
+        return katex.renderToString(formula.trim(), {
+          displayMode: true,
+          throwOnError: true,
+        });
+      } catch {
+        return match;
+      }
+    });
 
-    // KaTeX CDN links (using version 0.16.9 for compatibility)
+    // Step 3: Render display math \[...\]
+    processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match, formula) => {
+      try {
+        return katex.renderToString(formula.trim(), {
+          displayMode: true,
+          throwOnError: true,
+        });
+      } catch {
+        return match;
+      }
+    });
+
+    // Step 4: Render inline math $...$ (not $$, no newlines)
+    processed = processed.replace(
+      /(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g,
+      (match, formula) => {
+        try {
+          return katex.renderToString(formula.trim(), {
+            displayMode: false,
+            throwOnError: true,
+          });
+        } catch {
+          return match;
+        }
+      },
+    );
+
+    // Step 5: Render inline math \(...\)
+    processed = processed.replace(/\\\((.*?)\\\)/g, (match, formula) => {
+      try {
+        return katex.renderToString(formula.trim(), {
+          displayMode: false,
+          throwOnError: true,
+        });
+      } catch {
+        return match;
+      }
+    });
+
+    // Step 6: Restore protected blocks
+    blocks.forEach((block, i) => {
+      processed = processed.replace(`<!--MATHPROTECT${i}-->`, block);
+    });
+
+    // Step 7: Inject KaTeX CSS for proper styling of pre-rendered math HTML
     const katexCSS =
-      '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">';
-    const katexJS =
-      '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>';
-    const katexAutoRender =
-      '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117n7w6ODWgRrA7TlVzRsFtwW3ZxUo8h4w20Z5J3d3xjfcw" crossorigin="anonymous"></script>';
-    // Separate script to configure auto-render with proper delimiters including $...$ for inline math
-    const katexInit = `<script>
-document.addEventListener("DOMContentLoaded", function() {
-  function tryRender() {
-    if (typeof renderMathInElement === "function") {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\\\\(", right: "\\\\)", display: false},
-          {left: "\\\\[", right: "\\\\]", display: true}
-        ],
-        throwOnError: false
-      });
-    } else {
-      setTimeout(tryRender, 100);
-    }
-  }
-  tryRender();
-});
-</script>`;
+      '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">';
 
-    const katexInjection = cdnAlreadyPresent
-      ? `  ${katexInit}`
-      : `  ${katexCSS}\n  ${katexJS}\n  ${katexAutoRender}\n  ${katexInit}`;
-
-    // Try to inject into </head> section (most common case)
-    if (html.includes("</head>")) {
-      console.log("Injecting KaTeX before </head> tag");
-      return html.replace("</head>", `${katexInjection}\n</head>`);
-    }
-
-    // If no </head> tag, try to inject after <head> tag
-    if (html.includes("<head>")) {
-      console.log("Injecting KaTeX after <head> tag");
-      // Use regex to handle <head> with attributes
-      return html.replace(/<head([^>]*)>/i, `<head$1>\n${katexInjection}`);
-    }
-
-    // If HTML structure exists but no <head>, add it
-    if (html.includes("<html")) {
-      console.log("Adding <head> section with KaTeX");
-      return html.replace(
+    if (processed.includes("</head>")) {
+      return processed.replace("</head>", `  ${katexCSS}\n</head>`);
+    } else if (/<head([^>]*)>/i.test(processed)) {
+      return processed.replace(
+        /<head([^>]*)>/i,
+        `<head$1>\n  ${katexCSS}`,
+      );
+    } else if (processed.includes("<html")) {
+      return processed.replace(
         /(<html[^>]*>)/i,
-        `$1\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n${katexInjection}\n</head>`,
+        `$1\n<head><meta charset="UTF-8">${katexCSS}</head>`,
       );
     }
 
-    // If no HTML structure, wrap it with full HTML document
-    console.log("Wrapping content with full HTML document including KaTeX");
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-${katexInjection}
-</head>
-<body>
-${html}
-</body>
-</html>`;
+    // No HTML structure - wrap content
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">${katexCSS}</head><body>${processed}</body></html>`;
   };
 
   return { injectKaTeX };

@@ -115,6 +115,7 @@ export default function GuidePage() {
           <ProgressPanel
             sessionState={sessionState}
             isLoading={isLoading}
+            loadingMessage={loadingMessage}
             canStart={canStart}
             canNext={canNext}
             isLastKnowledge={isLastKnowledge}
@@ -192,12 +193,29 @@ export default function GuidePage() {
           />
         ) : isLoading ? (
           <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col items-center justify-center p-8">
-            <Loader2 className="w-12 h-12 text-violet-500 dark:text-violet-400 animate-spin mb-4" />
-            <p className="text-slate-600 dark:text-slate-300 font-medium">
-              {loadingMessage || t("Generating interactive learning page...")}
+            {/* Animated generating indicator */}
+            <div className="relative mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 dark:from-violet-500/10 dark:to-blue-500/10 flex items-center justify-center animate-pulse">
+                <Loader2 className="w-8 h-8 text-violet-500 dark:text-violet-400 animate-spin" />
+              </div>
+            </div>
+            <p className="text-slate-700 dark:text-slate-200 font-semibold text-lg mb-1">
+              {loadingMessage || t("Creating interactive lesson...")}
             </p>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">
-              {t("This may take a moment...")}
+            {sessionState.knowledge_points.length > 0 && (
+              <p className="text-sm text-violet-600 dark:text-violet-400 font-medium mb-3">
+                {sessionState.knowledge_points[Math.max(0, sessionState.current_index)]?.knowledge_title || ""}
+              </p>
+            )}
+            {/* Skeleton preview */}
+            <div className="w-full max-w-md space-y-3 mt-4">
+              <div className="h-4 bg-slate-100 dark:bg-white/[0.04] rounded-full animate-pulse" style={{ width: "80%" }} />
+              <div className="h-4 bg-slate-100 dark:bg-white/[0.04] rounded-full animate-pulse" style={{ width: "65%" }} />
+              <div className="h-20 bg-slate-100 dark:bg-white/[0.04] rounded-xl animate-pulse" />
+              <div className="h-4 bg-slate-100 dark:bg-white/[0.04] rounded-full animate-pulse" style={{ width: "45%" }} />
+            </div>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-6">
+              {t("AI is designing an interactive page for you...")}
             </p>
           </div>
         ) : (
