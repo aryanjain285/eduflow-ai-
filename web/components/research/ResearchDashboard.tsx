@@ -262,7 +262,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
                   <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
                     {t("Optimized Topic")}
                   </p>
-                  <p className="text-sm text-slate-700 dark:text-slate-200">
+                  <p className="text-sm text-slate-700 dark:text-slate-200 line-clamp-3">
                     {planning.optimizedTopic}
                   </p>
                 </div>
@@ -539,10 +539,10 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   return (
     <div className="flex flex-col h-full bg-slate-50/50 dark:bg-white/[0.03]">
       {/* Top Bar: Progress & Global Status */}
-      <div className="bg-white dark:bg-white/[0.05] border-b border-slate-200 dark:border-white/[0.08] px-6 py-4 flex items-center justify-between shadow-sm shrink-0 z-20 relative">
-        <div className="flex items-center gap-4">
+      <div className="bg-white dark:bg-white/[0.05] border-b border-slate-200 dark:border-white/[0.08] px-4 py-2 flex items-center justify-between shadow-sm shrink-0 z-20 relative">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <div
-            className={`p-2 rounded-lg ${
+            className={`p-1.5 rounded-lg shrink-0 ${
               global.stage === "idle"
                 ? "bg-slate-100 dark:bg-white/[0.06] text-slate-400 dark:text-slate-500"
                 : global.stage === "completed"
@@ -551,13 +551,13 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
             }`}
           >
             {isCompleted ? (
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-4 h-4" />
             ) : (
-              <LayoutDashboard className="w-5 h-5" />
+              <LayoutDashboard className="w-4 h-4" />
             )}
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
               {global.stage === "idle"
                 ? t("Ready to Research")
                 : global.stage === "completed"
@@ -646,12 +646,12 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
           ) : (
             <>
               {/* Step Tabs */}
-              <div className="px-6 pt-4 pb-2 flex justify-center shrink-0">
+              <div className="px-4 pt-2 pb-1 flex justify-center shrink-0">
                 {stepTabsContent}
               </div>
 
               {/* Tab Content */}
-              <div className="flex-1 overflow-hidden p-6 flex flex-col">
+              <div className="flex-1 overflow-hidden px-4 py-2 flex flex-col">
                 {activeProcessTab === "planning" && planningContent}
                 {activeProcessTab === "researching" && researchingContent}
                 {activeProcessTab === "reporting" && reportingContent}
