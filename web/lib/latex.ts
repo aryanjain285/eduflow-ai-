@@ -27,9 +27,20 @@ export function convertLatexDelimiters(content: string): string {
   // Be careful not to match escaped parentheses in other contexts
   result = result.replace(/\\\(([\s\S]*?)\\\)/g, " $$$1$$ ");
 
-  // Also handle cases where LaTeX is directly in the text without proper delimiters
-  // e.g., standalone \lim, \frac, etc. that should be wrapped
-  // This is a common issue with LLM outputs
+  // Fix single $ on its own line used as block math delimiter
+  // Pattern: $\n<formula>\n$ → $$\n<formula>\n$$
+  // This handles LLMs that output block math with single $ on separate lines
+  result = result.replace(
+    /^\$\s*\n([\s\S]*?)\n\s*\$\s*$/gm,
+    "\n$$\n$1\n$$\n",
+  );
+
+  // Also catch: line ending with just $, next lines have formula, then line with just $
+  // More aggressive: find isolated $ lines and pair them as block math
+  result = result.replace(
+    /(?:^|\n)\$[ \t]*\n([\s\S]*?)\n[ \t]*\$(?:\n|$)/g,
+    "\n$$\n$1\n$$\n",
+  );
 
   // Clean up multiple consecutive newlines
   result = result.replace(/\n{3,}/g, "\n\n");

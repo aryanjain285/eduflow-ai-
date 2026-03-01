@@ -1296,7 +1296,7 @@ export default function CoWriterEditor({
     <button
       onClick={onClick}
       title={title}
-      className={`p-1.5 rounded transition-all ${active ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"}`}
+      className={`p-1.5 rounded transition-all ${active ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] hover:text-slate-700 dark:hover:text-slate-200"}`}
     >
       {icon}
     </button>
@@ -1309,9 +1309,9 @@ export default function CoWriterEditor({
   return (
     <div className="flex h-full gap-4">
       {/* Left Column: Editor */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden relative">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#12121e] rounded-xl shadow-sm border border-slate-200 dark:border-white/[0.08] overflow-hidden relative">
         {/* Toolbar */}
-        <div className="p-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-1 flex-wrap">
+        <div className="p-2 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-[#16162a] flex items-center gap-1 flex-wrap">
           {/* Formatting */}
           <div className="flex items-center gap-0.5">
             <ToolbarButton
@@ -1462,7 +1462,7 @@ export default function CoWriterEditor({
 
         {/* Editor Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/30 flex justify-between items-center">
+          <div className="p-2 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/30 dark:bg-white/[0.04] flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {t("Editor")}
@@ -1501,11 +1501,11 @@ export default function CoWriterEditor({
                 window.innerWidth - 340,
                 Math.max(20, popover.x - 160),
               ),
-              top: Math.min(window.innerHeight - 480, popover.y),
+              top: Math.min(window.innerHeight - 480, Math.max(10, popover.y - 320)),
             }}
-            className="z-50 w-[320px] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-600 animate-in fade-in zoom-in-95 duration-200 flex flex-col"
+            className="z-50 w-[320px] bg-white dark:bg-[#1a1a30] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)] border border-slate-200 dark:border-violet-500/20 animate-in fade-in zoom-in-95 duration-200 flex flex-col"
           >
-            <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 flex justify-between items-center rounded-t-xl">
+            <div className="p-3 border-b border-slate-100 dark:border-white/[0.06] bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-violet-500/10 dark:to-blue-500/10 flex justify-between items-center rounded-t-2xl">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
                 <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                 {t("AI Edit Assistant")}
@@ -1522,7 +1522,7 @@ export default function CoWriterEditor({
 
             <div className="p-4 space-y-4">
               {/* Selected Text Preview */}
-              <div className="text-xs overflow-y-auto text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 p-2 rounded-lg border border-slate-100 dark:border-slate-600 line-clamp-2 italic">
+              <div className="text-xs overflow-y-auto text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/[0.04] p-2 rounded-lg border border-slate-100 dark:border-white/[0.06] line-clamp-2 italic">
                 &quot;{selection?.text}&quot;
               </div>
 
@@ -1536,7 +1536,7 @@ export default function CoWriterEditor({
                   value={instruction}
                   onChange={(e) => setInstruction(e.target.value)}
                   placeholder={t("e.g. Make it more formal...")}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-white/[0.08] rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none bg-white dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
                 />
               </div>
 
@@ -1549,14 +1549,14 @@ export default function CoWriterEditor({
                   <div className="flex gap-2">
                     <button
                       onClick={() => setSource(source === "rag" ? null : "rag")}
-                      className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border rounded-lg transition-all ${source === "rag" ? "bg-purple-50 dark:bg-purple-900/40 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300" : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"}`}
+                      className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border rounded-lg transition-all ${source === "rag" ? "bg-purple-50 dark:bg-purple-900/40 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300" : "bg-white dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.08]"}`}
                     >
                       <Database className="w-3 h-3" />
                       {t("RAG")}
                     </button>
                     <button
                       onClick={() => setSource(source === "web" ? null : "web")}
-                      className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border rounded-lg transition-all ${source === "web" ? "bg-blue-50 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300" : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600"}`}
+                      className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border rounded-lg transition-all ${source === "web" ? "bg-blue-50 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300" : "bg-white dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.08]"}`}
                     >
                       <Globe className="w-3 h-3" />
                       {t("Web")}
@@ -1571,7 +1571,7 @@ export default function CoWriterEditor({
                   <select
                     value={selectedKb}
                     onChange={(e) => setSelectedKb(e.target.value)}
-                    className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200"
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-white/[0.08] rounded-lg outline-none bg-white dark:bg-white/[0.06] text-slate-800 dark:text-slate-200"
                   >
                     {kbs.map((kb) => (
                       <option key={kb} value={kb}>
@@ -1583,7 +1583,7 @@ export default function CoWriterEditor({
               )}
 
               {/* Actions */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-700 space-y-3">
+              <div className="pt-2 border-t border-slate-100 dark:border-white/[0.08] space-y-3">
                 <div className="grid grid-cols-4 gap-1.5">
                   <button
                     onClick={() => setSelectedAction("rewrite")}
@@ -1654,10 +1654,10 @@ export default function CoWriterEditor({
       <div className="flex-1 flex flex-col gap-4">
         {/* Preview Area (Upper) */}
         <div
-          className={`flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col transition-all`}
+          className={`flex-1 bg-white dark:bg-[#12121e] rounded-xl shadow-sm border border-slate-200 dark:border-white/[0.08] overflow-hidden flex flex-col transition-all`}
         >
           {/* Preview Header & Toolbar */}
-          <div className="p-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+          <div className="p-2 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-[#16162a] flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {t("Preview")}
@@ -1683,7 +1683,7 @@ export default function CoWriterEditor({
               <Divider />
               <button
                 onClick={() => setHideAiMarks(!hideAiMarks)}
-                className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-all ${hideAiMarks ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+                className={`flex items-center gap-1 px-2 py-1 text-xs rounded transition-all ${hideAiMarks ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07]"}`}
                 title={hideAiMarks ? t("Show AI Marks") : t("Hide AI Marks")}
               >
                 {hideAiMarks ? (
@@ -1695,7 +1695,7 @@ export default function CoWriterEditor({
               <Divider />
               <button
                 onClick={exportMarkdown}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-all"
                 title={t("Export Markdown")}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -1704,7 +1704,7 @@ export default function CoWriterEditor({
               <button
                 onClick={exportPDF}
                 disabled={isProcessing}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-all disabled:opacity-50"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-all disabled:opacity-50"
                 title={t("Export PDF")}
               >
                 <Download className="w-3.5 h-3.5" />
@@ -1713,7 +1713,7 @@ export default function CoWriterEditor({
               <Divider />
               <button
                 onClick={() => setShowHistory(!showHistory)}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-all ${showHistory ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+                className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-all ${showHistory ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07]"}`}
                 title={t("History")}
               >
                 <History className="w-3.5 h-3.5" />
@@ -1843,14 +1843,14 @@ export default function CoWriterEditor({
 
             {/* History Panel Overlay */}
             {showHistory && (
-              <div className="absolute inset-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm flex flex-col animate-in fade-in duration-200">
-                <div className="p-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <div className="absolute inset-0 z-10 bg-white/95 dark:bg-[#0d0d1a]/95 backdrop-blur-sm flex flex-col animate-in fade-in duration-200">
+                <div className="p-3 border-b border-slate-100 dark:border-white/[0.08] flex justify-between items-center bg-slate-50/50 dark:bg-[#16162a]">
                   <h3 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     {t("Version History")}
                   </h3>
                   <button
                     onClick={() => setShowHistory(false)}
-                    className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                    className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1865,7 +1865,7 @@ export default function CoWriterEditor({
                       {[...operationHistory].reverse().map((op) => (
                         <div
                           key={op.id}
-                          className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:shadow-sm transition-all cursor-pointer group"
+                          className="p-3 bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-lg hover:shadow-sm transition-all cursor-pointer group"
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span
@@ -1912,9 +1912,9 @@ export default function CoWriterEditor({
         </div>
 
         {/* Podcast / Narration Area (Bottom Collapsible) */}
-        <div className="shrink-0 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-all">
+        <div className="shrink-0 bg-white dark:bg-white/[0.03] rounded-xl shadow-sm border border-slate-200 dark:border-white/[0.08] overflow-hidden transition-all">
           <div
-            className="p-2 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
+            className="p-2 bg-slate-50/50 dark:bg-[#16162a] flex justify-between items-center cursor-pointer hover:bg-slate-100/50 dark:hover:bg-white/[0.07]/50 transition-colors"
             onClick={() => setIsPodcastExpanded(!isPodcastExpanded)}
           >
             <div className="flex items-center gap-2">
@@ -1936,7 +1936,7 @@ export default function CoWriterEditor({
           </div>
 
           {isPodcastExpanded && (
-            <div className="p-4 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2">
+            <div className="p-4 border-t border-slate-100 dark:border-white/[0.08] animate-in slide-in-from-top-2">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {ttsAvailable === false && (
@@ -2028,7 +2028,7 @@ export default function CoWriterEditor({
                         setShowNarrationNotebookModal(true);
                       }}
                       disabled={!narrationScript}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-white/[0.07] disabled:opacity-50"
                     >
                       <Book className="w-3.5 h-3.5" />
                       {t("Save Podcast to Notebook")}
@@ -2040,7 +2040,7 @@ export default function CoWriterEditor({
                       <span>{narrationError}</span>
                     </div>
                   )}
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg p-2 h-32 overflow-y-auto text-xs text-slate-700 dark:text-slate-300">
+                  <div className="bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-lg p-2 h-32 overflow-y-auto text-xs text-slate-700 dark:text-slate-300">
                     {narrationScript ? (
                       <p className="whitespace-pre-wrap leading-relaxed">
                         {narrationScript}
@@ -2056,7 +2056,7 @@ export default function CoWriterEditor({
                 </div>
 
                 <div className="w-full md:w-56 space-y-2">
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg p-2 h-20 overflow-y-auto">
+                  <div className="bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-lg p-2 h-20 overflow-y-auto">
                     <div className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                       <Headphones className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                       {t("Key Points")}
@@ -2077,7 +2077,7 @@ export default function CoWriterEditor({
                       </div>
                     )}
                   </div>
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg p-3">
+                  <div className="bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
                         <Headphones className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
@@ -2124,8 +2124,8 @@ export default function CoWriterEditor({
 
       {/* Global Loading Overlay */}
       {isProcessing && !popover && (
-        <div className="fixed inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-200 dark:border-slate-700">
+        <div className="fixed inset-0 bg-white/80 dark:bg-[#0d0d1a]/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-white/[0.05] p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4 border border-slate-200 dark:border-white/[0.08]">
             <Loader2 className="w-8 h-8 text-purple-600 dark:text-purple-400 animate-spin" />
             <span className="font-medium text-slate-700 dark:text-slate-200">
               {t("Exporting...")}

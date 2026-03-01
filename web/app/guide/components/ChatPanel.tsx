@@ -85,15 +85,15 @@ export default function ChatPanel({
   };
 
   return (
-    <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+    <div className="flex-1 bg-white dark:bg-[#14142a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.10] flex flex-col overflow-hidden">
+      <div className="p-3 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.04] text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
         <MessageSquare className="w-4 h-4" />
         {t("Learning Assistant")}
       </div>
 
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30 dark:bg-slate-800/30"
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30 dark:bg-white/[0.04]"
       >
         {messages.map((msg) => (
           <div
@@ -103,16 +103,16 @@ export default function ChatPanel({
             <div
               className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm ${
                 msg.role === "user"
-                  ? "bg-indigo-600 text-white rounded-tr-none shadow-md shadow-indigo-500/20"
+                  ? "bg-gradient-to-r from-violet-500 to-blue-600 text-white rounded-tr-none shadow-md shadow-violet-500/20"
                   : msg.role === "system" && msg.content.includes("⏳")
-                    ? "bg-amber-50 border border-amber-200 text-amber-900 rounded-tl-none"
+                    ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 rounded-tl-none"
                     : msg.role === "system"
-                      ? "bg-blue-50 border border-blue-200 text-blue-900 rounded-tl-none"
-                      : "bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm"
+                      ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 rounded-tl-none"
+                      : "bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-200 rounded-tl-none shadow-sm"
               }`}
             >
               {msg.role === "system" || msg.role === "assistant" ? (
-                <div className="prose prose-sm max-w-none prose-slate">
+                <div className="prose prose-sm max-w-none prose-slate dark:prose-invert">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeKatex]}
@@ -131,7 +131,7 @@ export default function ChatPanel({
 
       {/* Input Area */}
       {isLearning && (
-        <div className="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+        <div className="p-3 bg-white dark:bg-[#14142a] border-t border-slate-100 dark:border-white/[0.08]">
           <div className="relative flex items-center gap-2">
             <input
               type="text"
@@ -142,7 +142,7 @@ export default function ChatPanel({
               }
               placeholder={t("Have any questions? Feel free to ask...")}
               disabled={sendingMessage}
-              className="flex-1 pl-4 pr-10 py-2.5 bg-slate-100 dark:bg-slate-700 border-transparent focus:bg-white dark:focus:bg-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 pl-4 pr-10 py-2.5 bg-slate-100 dark:bg-white/[0.06] border-transparent focus:bg-white dark:focus:bg-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               onClick={handleSendMessage}

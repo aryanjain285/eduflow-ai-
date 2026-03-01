@@ -967,7 +967,7 @@ export default function KnowledgePage() {
               setLoading(true);
               await fetchKnowledgeBases();
             }}
-            className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow"
+            className="bg-white dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/[0.07] transition-colors flex items-center gap-2 border border-slate-200 dark:border-white/[0.08] shadow-sm hover:shadow"
             title={t("Refresh knowledge bases")}
           >
             <RefreshCw className="w-4 h-4" />
@@ -980,7 +980,7 @@ export default function KnowledgePage() {
               setRagProvider("llamaindex");
               setCreateModalOpen(true);
             }}
-            className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center gap-2 shadow-lg shadow-slate-900/20"
+            className="bg-gradient-to-r from-violet-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-violet-600 hover:to-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-violet-500/25"
           >
             <Plus className="w-4 h-4" />
             {t("New Knowledge Base")}
@@ -1002,7 +1002,7 @@ export default function KnowledgePage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white dark:bg-slate-800 h-48 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-pulse"
+              className="bg-white dark:bg-white/[0.05] h-48 rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] animate-pulse"
             />
           ))}
         </div>
@@ -1014,12 +1014,12 @@ export default function KnowledgePage() {
           {kbs.map((kb) => (
             <div
               key={kb.name}
-              className="group bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col"
+              className="group bg-white dark:bg-white/[0.05] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col"
             >
               {/* Card Header */}
-              <div className="p-6 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-start">
+              <div className="p-6 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.05] flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-sm">
+                  <div className="w-10 h-10 bg-white dark:bg-white/[0.06] rounded-xl border border-slate-200 dark:border-white/[0.08] flex items-center justify-center shadow-sm">
                     <Database className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                   </div>
                   <div>
@@ -1095,7 +1095,7 @@ export default function KnowledgePage() {
                       );
                       setUploadModalOpen(true);
                     }}
-                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-white/[0.08] rounded-lg text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     title={t("Upload Documents")}
                   >
                     <Upload className="w-4 h-4" />
@@ -1113,7 +1113,7 @@ export default function KnowledgePage() {
               {/* Stats */}
               <div className="p-6 space-y-4 flex-1">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                  <div className="bg-slate-50 dark:bg-white/[0.06] p-3 rounded-lg">
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 flex items-center gap-1.5">
                       <FileText className="w-3 h-3" /> {t("Documents")}
                     </p>
@@ -1121,7 +1121,7 @@ export default function KnowledgePage() {
                       {kb.statistics.raw_documents}
                     </p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                  <div className="bg-slate-50 dark:bg-white/[0.06] p-3 rounded-lg">
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 flex items-center gap-1.5">
                       <ImageIcon className="w-3 h-3" /> {t("Images")}
                     </p>
@@ -1200,7 +1200,7 @@ export default function KnowledgePage() {
                       );
                     })()}
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-100 dark:bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
                     {(() => {
                       const apiProgress = kb.statistics.progress || kb.progress;
                       const wsProgress = progressMap[kb.name];
@@ -1346,8 +1346,9 @@ export default function KnowledgePage() {
 
       {/* Create KB Modal */}
       {createModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setCreateModalOpen(false)} />
+          <div className="relative bg-white dark:bg-[#16162a] rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-white/[0.10]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {t("Create Knowledge Base")}
@@ -1371,7 +1372,7 @@ export default function KnowledgePage() {
                   value={newKbName}
                   onChange={(e) => setNewKbName(e.target.value)}
                   placeholder={t("e.g., Math101")}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.06] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
               </div>
 
@@ -1382,7 +1383,7 @@ export default function KnowledgePage() {
                 <select
                   value={ragProvider}
                   onChange={(e) => setRagProvider(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.06] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 >
                   {ragProviders.length > 0 ? (
                     ragProviders.map((provider) => (
@@ -1399,7 +1400,7 @@ export default function KnowledgePage() {
                   )}
                 </select>
                 {/* Provider description */}
-                <div className="mt-2 p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-600">
+                <div className="mt-2 p-2.5 bg-slate-50 dark:bg-white/[0.06] rounded-lg border border-slate-100 dark:border-white/[0.08]">
                   <p className="text-xs text-slate-600 dark:text-slate-300">
                     {(() => {
                       const selectedProvider = ragProviders.find(
@@ -1439,7 +1440,7 @@ export default function KnowledgePage() {
                   className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                     dragActive
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
-                      : "border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50 dark:bg-slate-700/50"
+                      : "border-slate-200 dark:border-white/[0.08] hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50 dark:bg-white/[0.06]"
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -1483,7 +1484,7 @@ export default function KnowledgePage() {
 
                   {/* File list */}
                   {uploadFiles.length > 0 && (
-                    <div className="border-t border-slate-200 dark:border-slate-600 px-3 py-2 max-h-48 overflow-y-auto">
+                    <div className="border-t border-slate-200 dark:border-white/[0.08] px-3 py-2 max-h-48 overflow-y-auto">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           {uploadFiles.length === 1
@@ -1511,7 +1512,7 @@ export default function KnowledgePage() {
                         {uploadFiles.map((file) => (
                           <div
                             key={file.id}
-                            className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-slate-700 rounded-lg border border-slate-100 dark:border-slate-600 group"
+                            className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-white/[0.06] rounded-lg border border-slate-100 dark:border-white/[0.08] group"
                           >
                             <div className="flex items-center gap-2 min-w-0 flex-1">
                               {getFileIcon(file.type)}
@@ -1551,14 +1552,14 @@ export default function KnowledgePage() {
                 <button
                   type="button"
                   onClick={() => setCreateModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/[0.07]"
                 >
                   {t("Cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={!newKbName || uploadFiles.length === 0 || uploading}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-medium hover:bg-slate-800 dark:hover:bg-slate-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-blue-600 text-white font-medium hover:from-violet-600 hover:to-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20"
                 >
                   {uploading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -1574,8 +1575,8 @@ export default function KnowledgePage() {
 
       {/* Upload Modal (Existing) */}
       {uploadModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#16162a] rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200 dark:border-white/[0.10]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {t("Upload Documents")}
@@ -1600,7 +1601,7 @@ export default function KnowledgePage() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   {t("RAG Provider")}
                 </label>
-                <div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-slate-100">
+                <div className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-slate-600 text-slate-900 dark:text-slate-100">
                   {ragProvider === "llamaindex" && t("LlamaIndex")}
                   {ragProvider === "lightrag" && t("LightRAG")}
                   {ragProvider === "raganything" && t("RAG-Anything")}
@@ -1622,7 +1623,7 @@ export default function KnowledgePage() {
                 className={`border-2 border-dashed rounded-xl transition-colors ${
                   dragActive
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
-                    : "border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50 dark:bg-slate-700/50"
+                    : "border-slate-200 dark:border-white/[0.08] hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50 dark:bg-white/[0.06]"
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -1666,7 +1667,7 @@ export default function KnowledgePage() {
 
                 {/* File list */}
                 {uploadFiles.length > 0 && (
-                  <div className="border-t border-slate-200 dark:border-slate-600 px-3 py-2 max-h-48 overflow-y-auto">
+                  <div className="border-t border-slate-200 dark:border-white/[0.08] px-3 py-2 max-h-48 overflow-y-auto">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {uploadFiles.length} file
@@ -1687,7 +1688,7 @@ export default function KnowledgePage() {
                       {uploadFiles.map((file) => (
                         <div
                           key={file.id}
-                          className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-slate-700 rounded-lg border border-slate-100 dark:border-slate-600 group"
+                          className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-white/[0.06] rounded-lg border border-slate-100 dark:border-white/[0.08] group"
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
                             {getFileIcon(file.type)}
@@ -1726,14 +1727,14 @@ export default function KnowledgePage() {
                 <button
                   type="button"
                   onClick={() => setUploadModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/[0.07]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploadFiles.length === 0 || uploading}
-                  className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-blue-600 text-white font-medium hover:from-violet-600 hover:to-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {uploading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

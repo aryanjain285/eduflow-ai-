@@ -87,11 +87,11 @@ export default function HTMLViewer({
   }
 
   return (
-    <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden relative">
+    <div className="flex-1 bg-white dark:bg-[#14142a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.10] flex flex-col overflow-hidden relative">
       {/* Debug Button */}
       <button
         onClick={onOpenDebugModal}
-        className="absolute top-4 right-4 z-10 p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors shadow-sm"
+        className="absolute top-4 right-4 z-10 p-2 bg-slate-100 dark:bg-[#1a1a2e] hover:bg-slate-200 dark:hover:bg-white/[0.08] rounded-lg transition-colors shadow-sm border border-transparent dark:border-white/[0.08]"
         title={t("Fix HTML")}
       >
         <Bug className="w-4 h-4 text-slate-600 dark:text-slate-300" />

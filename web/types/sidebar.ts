@@ -19,13 +19,13 @@ export const SIDEBAR_COLLAPSED_WIDTH = 64;
 /**
  * Default sidebar description
  */
-export const DEFAULT_SIDEBAR_DESCRIPTION = "✨ Data Intelligence Lab @ HKU";
+export const DEFAULT_SIDEBAR_DESCRIPTION = "";
 
 /**
  * Default navigation order
  */
 export const DEFAULT_NAV_ORDER: SidebarNavOrder = {
-  start: ["/", "/history", "/knowledge", "/notebook"],
+  start: ["/", "/dashboard", "/history", "/knowledge", "/notebook"],
   learnResearch: [
     "/question",
     "/solver",

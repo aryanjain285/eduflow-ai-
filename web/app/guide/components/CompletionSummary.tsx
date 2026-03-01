@@ -49,16 +49,16 @@ export default function CompletionSummary({ summary }: CompletionSummaryProps) {
   };
 
   return (
-    <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden relative">
+    <div className="flex-1 bg-white dark:bg-white/[0.05] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col overflow-hidden relative">
       {/* Summary Header */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20 flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] bg-gradient-to-r from-emerald-50 to-indigo-50 dark:from-emerald-900/20 dark:to-indigo-900/20 flex items-center justify-between shrink-0">
         <h2 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           {t("Learning Summary")}
         </h2>
       </div>
       {/* Summary Content */}
-      <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-slate-800">
+      <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-white/[0.05]">
         <div className="prose prose-slate dark:prose-invert prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}

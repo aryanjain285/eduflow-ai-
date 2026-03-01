@@ -169,7 +169,7 @@ export default function SystemStatus() {
       case "error":
         return "bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800";
       default:
-        return "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700";
+        return "bg-slate-50 dark:bg-white/[0.05] border-slate-100 dark:border-white/[0.08]";
     }
   };
 
@@ -223,7 +223,7 @@ export default function SystemStatus() {
       <div
         className={`px-3 py-2 rounded-lg flex items-center justify-between text-sm transition-colors border ${
           backendConnected === null
-            ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+            ? "bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08]"
             : backendConnected
               ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-100 dark:border-green-800"
               : "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-100 dark:border-red-800"
@@ -241,7 +241,7 @@ export default function SystemStatus() {
         <>
           {/* LLM Status */}
           <div
-            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700`}
+            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.08]`}
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ export default function SystemStatus() {
               <button
                 onClick={() => testModelConnection("llm")}
                 disabled={testing.llm || !backendConnected}
-                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {testing.llm ? (
                   <>
@@ -306,7 +306,7 @@ export default function SystemStatus() {
 
           {/* Embeddings Status */}
           <div
-            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700`}
+            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.08]`}
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function SystemStatus() {
               <button
                 onClick={() => testModelConnection("embeddings")}
                 disabled={testing.embeddings || !backendConnected}
-                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {testing.embeddings ? (
                   <>
@@ -372,7 +372,7 @@ export default function SystemStatus() {
 
           {/* TTS Status */}
           <div
-            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700`}
+            className={`px-3 py-2.5 rounded-lg border text-sm transition-colors bg-slate-50 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.08]`}
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
@@ -406,7 +406,7 @@ export default function SystemStatus() {
               <button
                 onClick={() => testModelConnection("tts")}
                 disabled={testing.tts || !backendConnected}
-                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                className="w-full mt-1.5 px-3 py-1.5 text-xs bg-white dark:bg-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {testing.tts ? (
                   <>

@@ -24,9 +24,11 @@ import {
   GripVertical,
   Check,
   X,
+  Brain,
   LucideIcon,
 } from "lucide-react";
 import { useGlobal } from "@/context/GlobalContext";
+import { DEFAULT_NAV_ORDER } from "@/types/sidebar";
 
 const SIDEBAR_EXPANDED_WIDTH = 256;
 const SIDEBAR_COLLAPSED_WIDTH = 64;
@@ -41,6 +43,7 @@ interface NavItem {
 // All available navigation items (static reference)
 const ALL_NAV_ITEMS: Record<string, { icon: LucideIcon; nameKey: string }> = {
   "/": { icon: Home, nameKey: "Home" },
+  "/dashboard": { icon: Brain, nameKey: "Learning State" },
   "/history": { icon: History, nameKey: "History" },
   "/knowledge": { icon: BookOpen, nameKey: "Knowledge Bases" },
   "/notebook": { icon: Book, nameKey: "Notebooks" },
@@ -80,7 +83,30 @@ export default function Sidebar() {
   );
 
   // Build navigation items from saved order - defined inside useMemo to properly capture dependencies
+  // Also inject any new nav items that aren't in the saved order yet
   const navGroups = useMemo(() => {
+    const ensureNewItems = (saved: string[], defaults: string[]): string[] => {
+      const result = [...saved];
+      defaults.forEach((href) => {
+        if (!result.includes(href) && ALL_NAV_ITEMS[href]) {
+          // Find the position from defaults and insert nearby
+          const defaultIdx = defaults.indexOf(href);
+          const insertAt = Math.min(defaultIdx, result.length);
+          result.splice(insertAt, 0, href);
+        }
+      });
+      return result;
+    };
+
+    const startItems = ensureNewItems(
+      sidebarNavOrder.start,
+      DEFAULT_NAV_ORDER.start,
+    );
+    const learnItems = ensureNewItems(
+      sidebarNavOrder.learnResearch,
+      DEFAULT_NAV_ORDER.learnResearch,
+    );
+
     const buildNavItems = (hrefs: string[]): NavItem[] => {
       return hrefs
         .filter((href) => ALL_NAV_ITEMS[href])
@@ -95,12 +121,12 @@ export default function Sidebar() {
       {
         id: "start" as const,
         name: t("Workspace"),
-        items: buildNavItems(sidebarNavOrder.start),
+        items: buildNavItems(startItems),
       },
       {
         id: "learnResearch" as const,
         name: t("Learn & Research"),
-        items: buildNavItems(sidebarNavOrder.learnResearch),
+        items: buildNavItems(learnItems),
       },
     ];
   }, [sidebarNavOrder, t]);
@@ -212,12 +238,12 @@ export default function Sidebar() {
 
   return (
     <div
-      className="relative flex-shrink-0 bg-slate-50/80 dark:bg-slate-800/80 h-full border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 ease-in-out overflow-hidden"
+      className="relative flex-shrink-0 bg-slate-50/80 dark:bg-white/[0.04] dark:backdrop-blur-2xl dark:saturate-150 h-full border-r border-slate-200 dark:border-white/[0.06] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)] flex flex-col transition-all duration-300 ease-in-out overflow-hidden z-10"
       style={{ width: currentWidth }}
     >
       {/* Header */}
       <div
-        className={`border-b border-slate-100 dark:border-slate-700 transition-all duration-300 ${
+        className={`border-b border-slate-100 dark:border-white/[0.08] transition-all duration-300 ${
           sidebarCollapsed ? "px-2 py-3" : "px-4 py-3"
         }`}
       >
@@ -256,7 +282,7 @@ export default function Sidebar() {
               {/* Collapse button */}
               <button
                 onClick={toggleSidebar}
-                className="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                className="text-slate-400 hover:text-violet-500 dark:hover:text-violet-400 p-1.5 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-colors"
                 title={t("Collapse sidebar")}
               >
                 <ChevronsLeft className="w-4 h-4" />
@@ -265,7 +291,7 @@ export default function Sidebar() {
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                className="text-slate-400 hover:text-violet-500 dark:hover:text-violet-400 p-1.5 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-colors"
                 title={t("Visit EduFlow Homepage")}
               >
                 <Globe className="w-4 h-4" />
@@ -274,7 +300,7 @@ export default function Sidebar() {
                 href="https://github.com/eduflow-ai/EduFlow"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                className="text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-1.5 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-colors"
                 title={t("View on GitHub")}
               >
                 <Github className="w-4 h-4" />
@@ -296,7 +322,7 @@ export default function Sidebar() {
                   value={editingDescriptionValue}
                   onChange={(e) => setEditingDescriptionValue(e.target.value)}
                   onKeyDown={handleDescriptionKeyDown}
-                  className="flex-1 text-[10px] font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-600 px-2 py-1.5 rounded-md border border-blue-300 dark:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="flex-1 text-[10px] font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-white/[0.08] px-2 py-1.5 rounded-md border border-blue-300 dark:border-violet-500/40 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
                   placeholder={t("Enter your description...")}
                 />
                 <button
@@ -317,7 +343,7 @@ export default function Sidebar() {
             ) : (
               <div
                 onClick={handleDescriptionEdit}
-                className="text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-2 py-1.5 rounded-md border border-slate-100 dark:border-slate-600 truncate cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-200 dark:hover:border-slate-500 transition-colors group"
+                className="text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-white/[0.05] px-2 py-1.5 rounded-md border border-slate-100 dark:border-white/[0.08] truncate cursor-pointer hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:border-slate-200 dark:hover:border-violet-500/30 transition-colors group"
                 title={t("Click to edit")}
               >
                 <span className="group-hover:hidden">{sidebarDescription}</span>
@@ -384,8 +410,8 @@ export default function Sidebar() {
                           : "gap-2.5 pl-2 pr-1.5 py-2"
                       } ${
                         isActive
-                          ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm border-slate-100 dark:border-slate-600"
-                          : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-sm border-transparent hover:border-slate-100 dark:hover:border-slate-600"
+                          ? "bg-white dark:bg-violet-500/[0.10] text-violet-600 dark:text-violet-400 shadow-sm dark:shadow-[0_0_20px_rgba(139,92,246,0.12)] border-slate-100 dark:border-violet-500/25"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/[0.07] hover:text-violet-600 dark:hover:text-violet-400 hover:shadow-sm border-transparent hover:border-slate-100 dark:hover:border-white/[0.08]"
                       }`}
                       onMouseEnter={() =>
                         sidebarCollapsed && setShowTooltip(item.href)
@@ -395,8 +421,8 @@ export default function Sidebar() {
                       <item.icon
                         className={`w-5 h-5 flex-shrink-0 transition-colors ${
                           isActive
-                            ? "text-blue-500 dark:text-blue-400"
-                            : "text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400"
+                            ? "text-violet-500 dark:text-violet-400"
+                            : "text-slate-400 dark:text-slate-500 group-hover:text-violet-500 dark:group-hover:text-violet-400"
                         }`}
                       />
                       <span
@@ -421,9 +447,9 @@ export default function Sidebar() {
                     </Link>
                     {/* Tooltip for collapsed state */}
                     {sidebarCollapsed && showTooltip === item.href && (
-                      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
+                      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2.5 py-1.5 bg-slate-900 dark:bg-white/[0.1] text-white text-xs rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
                         {item.name}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-slate-700" />
+                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-white/[0.1]" />
                       </div>
                     )}
                   </div>
@@ -432,7 +458,7 @@ export default function Sidebar() {
             </div>
             {/* Divider between groups in collapsed mode */}
             {sidebarCollapsed && idx < navGroups.length - 1 && (
-              <div className="h-px bg-slate-200 dark:bg-slate-700 my-2 mx-1" />
+              <div className="h-px bg-slate-200 dark:bg-white/[0.08] my-2 mx-1" />
             )}
           </div>
         ))}
@@ -440,7 +466,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div
-        className={`border-t border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/30 transition-all duration-300 ${
+        className={`border-t border-slate-100 dark:border-white/[0.08] bg-slate-50/30 dark:bg-white/[0.04] transition-all duration-300 ${
           sidebarCollapsed ? "px-2 py-2" : "px-2 py-2"
         }`}
       >
@@ -453,8 +479,8 @@ export default function Sidebar() {
                 : "gap-2.5 pl-2 pr-1.5 py-2"
             } ${
               pathname === "/settings"
-                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-100 dark:border-slate-600"
-                : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
+                ? "bg-white dark:bg-violet-500/[0.10] text-violet-600 dark:text-violet-400 shadow-sm dark:shadow-[0_0_20px_rgba(139,92,246,0.12)] border border-slate-100 dark:border-violet-500/25"
+                : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/[0.07] hover:text-slate-900 dark:hover:text-slate-100"
             }`}
             onMouseEnter={() => sidebarCollapsed && setShowTooltip("/settings")}
             onMouseLeave={() => setShowTooltip(null)}
@@ -462,7 +488,7 @@ export default function Sidebar() {
             <Settings
               className={`w-5 h-5 flex-shrink-0 transition-colors ${
                 pathname === "/settings"
-                  ? "text-blue-500 dark:text-blue-400"
+                  ? "text-violet-500 dark:text-violet-400"
                   : "text-slate-400 dark:text-slate-500"
               }`}
             />
@@ -478,9 +504,9 @@ export default function Sidebar() {
           </Link>
           {/* Tooltip for collapsed state */}
           {sidebarCollapsed && showTooltip === "/settings" && (
-            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
+            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 px-2.5 py-1.5 bg-slate-900 dark:bg-white/[0.1] text-white text-xs rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
               {t("Settings")}
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-slate-700" />
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-white/[0.1]" />
             </div>
           )}
         </div>
@@ -488,7 +514,7 @@ export default function Sidebar() {
         {/* Expand/Collapse button at bottom */}
         <button
           onClick={toggleSidebar}
-          className={`w-full mt-2 flex items-center rounded-md text-slate-400 dark:text-slate-500 hover:bg-white dark:hover:bg-slate-700 hover:text-blue-500 dark:hover:text-blue-400 hover:shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-600 transition-all duration-200 ${
+          className={`w-full mt-2 flex items-center rounded-md text-slate-400 dark:text-slate-500 hover:bg-white dark:hover:bg-white/[0.07] hover:text-violet-500 dark:hover:text-violet-400 hover:shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-white/[0.08] transition-all duration-200 ${
             sidebarCollapsed ? "justify-center p-2" : "gap-2.5 pl-2 pr-1.5 py-2"
           }`}
           title={sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")}

@@ -72,18 +72,18 @@ export default function Modal({
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl ${widthClasses[width]} max-h-[90vh] flex flex-col animate-in zoom-in-95`}
+        className={`bg-white dark:bg-white/[0.05] rounded-2xl shadow-2xl ${widthClasses[width]} max-h-[90vh] flex flex-col animate-in zoom-in-95`}
       >
         {/* Header */}
         {(title || titleIcon) && (
-          <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0">
+          <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between shrink-0">
             <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               {titleIcon}
               {title}
             </h3>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded-lg transition-colors"
             >
               <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             </button>
@@ -95,7 +95,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="p-4 border-t border-slate-100 dark:border-slate-700 shrink-0">
+          <div className="p-4 border-t border-slate-100 dark:border-white/[0.08] shrink-0">
             {footer}
           </div>
         )}

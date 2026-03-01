@@ -72,7 +72,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
 
   if (sortedTasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+      <div className="flex flex-col items-center justify-center p-8 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/[0.08] rounded-xl">
         <Activity className="w-8 h-8 mb-2 opacity-50" />
         <p className="text-sm">{t("No tasks initialized yet")}</p>
       </div>
@@ -95,7 +95,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
               ${
                 isSelected
                   ? "bg-indigo-50/50 dark:bg-indigo-900/30 border-indigo-500 ring-1 ring-indigo-500"
-                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600"
+                  : "bg-white dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.08] hover:border-indigo-300 dark:hover:border-indigo-600"
               }
               ${isActive ? "shadow-sm" : "opacity-90"}
             `}
@@ -117,7 +117,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
                       ? "bg-red-50 dark:bg-red-900/40"
                       : isActive
                         ? "bg-indigo-50 dark:bg-indigo-900/40"
-                        : "bg-slate-100 dark:bg-slate-700"
+                        : "bg-slate-100 dark:bg-white/[0.06]"
                 }`}
               >
                 {getStatusIcon(task.status)}
@@ -140,7 +140,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
                           ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"
                           : task.status === "running"
                             ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300"
-                            : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                            : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400"
                     }`}
                   >
                     {task.status}
@@ -155,7 +155,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
             </div>
 
             {/* Current Action / Summary */}
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-2.5 min-h-[48px] border border-slate-100 dark:border-slate-600">
+            <div className="bg-slate-50 dark:bg-white/[0.06] rounded-lg p-2.5 min-h-[48px] border border-slate-100 dark:border-white/[0.08]">
               <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                 <span className="font-medium text-slate-400 dark:text-slate-500 mr-1">
                   {t("Current Action:")}
@@ -173,7 +173,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({
                 {task.toolsUsed.slice(0, 5).map((tool, idx) => (
                   <div
                     key={idx}
-                    className="p-1.5 bg-white dark:bg-slate-700 rounded-md border border-slate-200 dark:border-slate-600 shadow-sm"
+                    className="p-1.5 bg-white dark:bg-white/[0.06] rounded-md border border-slate-200 dark:border-white/[0.08] shadow-sm"
                     title={tool}
                   >
                     {getToolIcon(tool)}

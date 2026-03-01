@@ -120,11 +120,11 @@ export default function ChatSessionDetail({
 
       {/* Modal */}
       <div
-        className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-300"
+        className="relative bg-white dark:bg-white/[0.05] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
+        <div className="p-6 border-b border-slate-100 dark:border-white/[0.08] flex justify-between items-center shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -147,7 +147,7 @@ export default function ChatSessionDetail({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.08] flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -170,7 +170,7 @@ export default function ChatSessionDetail({
                 (session.settings.kb_name ||
                   session.settings.enable_rag ||
                   session.settings.enable_web_search) && (
-                  <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-white/[0.08]">
                     {session.settings.kb_name && (
                       <span className="px-2.5 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
                         {t("KB")}: {session.settings.kb_name}
@@ -204,7 +204,7 @@ export default function ChatSessionDetail({
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       msg.role === "user"
                         ? "bg-blue-500 text-white rounded-br-none"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 rounded-bl-none"
                     }`}
                   >
                     {msg.role === "user" ? (
@@ -223,7 +223,7 @@ export default function ChatSessionDetail({
                     {/* Sources */}
                     {msg.sources &&
                       (msg.sources.rag?.length || msg.sources.web?.length) && (
-                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
+                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/[0.08]">
                           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
                             {t("Sources")}:
                           </p>
@@ -280,10 +280,10 @@ export default function ChatSessionDetail({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl flex justify-between items-center shrink-0">
+        <div className="p-6 border-t border-slate-100 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.03] rounded-b-2xl flex justify-between items-center shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            className="px-6 py-2.5 bg-slate-200 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-300 dark:hover:bg-white/[0.08] transition-colors"
           >
             {t("Close")}
           </button>

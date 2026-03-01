@@ -152,17 +152,19 @@ export default function AddToNotebookModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[480px] max-h-[80vh] flex flex-col animate-in zoom-in-95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-[#16162a] border border-slate-200 dark:border-white/[0.10] rounded-2xl shadow-2xl w-[480px] max-h-[80vh] flex flex-col animate-in zoom-in-95">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-t-2xl">
+        <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-t-2xl">
           <h3 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Book className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             {t("Add to Notebook")}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-white/50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-1 hover:bg-white/50 dark:hover:bg-white/[0.07] rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           </button>
@@ -196,7 +198,7 @@ export default function AddToNotebookModal({
           ) : (
             <>
               {/* Record Preview */}
-              <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600">
+              <div className="mb-4 p-3 bg-slate-50 dark:bg-white/[0.06] rounded-xl border border-slate-100 dark:border-white/[0.08]">
                 <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                   {t("Record Preview")}
                 </div>
@@ -236,7 +238,7 @@ export default function AddToNotebookModal({
                         }))
                       }
                       placeholder={t("Notebook name")}
-                      className="w-full px-3 py-2 mb-2 border border-indigo-200 dark:border-indigo-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      className="w-full px-3 py-2 mb-2 border border-indigo-200 dark:border-indigo-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-white dark:bg-white/[0.06] text-slate-900 dark:text-slate-100"
                       autoFocus
                     />
                     <div className="flex items-center gap-2 mb-2">
@@ -263,7 +265,7 @@ export default function AddToNotebookModal({
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setShowCreateForm(false)}
-                        className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/[0.07] rounded-lg transition-colors"
                       >
                         {t("Cancel")}
                       </button>
@@ -299,7 +301,7 @@ export default function AddToNotebookModal({
                         className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all border-2 text-left ${
                           selectedIds.includes(nb.id)
                             ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700"
-                            : "bg-white dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+                            : "bg-white dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08] hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-slate-50 dark:hover:bg-white/[0.07]"
                         }`}
                       >
                         <div
@@ -341,7 +343,7 @@ export default function AddToNotebookModal({
 
         {/* Footer */}
         {!success && !loading && (
-          <div className="p-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+          <div className="p-4 border-t border-slate-100 dark:border-white/[0.08] flex justify-between items-center">
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {selectedIds.length > 0
                 ? t(
@@ -354,7 +356,7 @@ export default function AddToNotebookModal({
             <div className="flex gap-2">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm"
+                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded-lg transition-colors text-sm"
               >
                 {t("Cancel")}
               </button>

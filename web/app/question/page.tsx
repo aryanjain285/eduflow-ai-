@@ -52,6 +52,7 @@ export default function QuestionPage() {
   const [kbs, setKbs] = useState<string[]>([]);
   const [showLogDrawer, setShowLogDrawer] = useState(false);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const [confidenceRatings, setConfidenceRatings] = useState<Record<number, number>>({});
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   // Derived state
@@ -159,6 +160,7 @@ export default function QuestionPage() {
     resetQuestionGen();
     setUserAnswers({});
     setSubmittedMap({});
+    setConfidenceRatings({});
     setActiveIdx(0);
   };
 
@@ -171,9 +173,9 @@ export default function QuestionPage() {
   return (
     <div className="h-screen flex gap-0 p-4 animate-fade-in overflow-hidden">
       {/* Main Panel */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-white/[0.05] rounded-2xl shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)] border border-slate-200 dark:border-white/[0.08] overflow-hidden dark:backdrop-blur-xl">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center backdrop-blur-sm shrink-0">
+        <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.04] flex justify-between items-center backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
               <PenTool className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -182,14 +184,14 @@ export default function QuestionPage() {
 
             {/* Mode Switching */}
             {isConfigMode && (
-              <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg border border-slate-200 dark:border-slate-600">
+              <div className="flex bg-slate-100 dark:bg-white/[0.06] p-1 rounded-lg border border-slate-200 dark:border-white/[0.08]">
                 <button
                   onClick={() =>
                     setQuestionState((prev) => ({ ...prev, mode: "knowledge" }))
                   }
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                     questionState.mode === "knowledge"
-                      ? "bg-white dark:bg-slate-600 text-purple-700 dark:text-purple-400 shadow-sm"
+                      ? "bg-white dark:bg-white/[0.05] text-purple-700 dark:text-purple-400 shadow-sm"
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   }`}
                 >
@@ -202,7 +204,7 @@ export default function QuestionPage() {
                   }
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                     questionState.mode === "mimic"
-                      ? "bg-white dark:bg-slate-600 text-purple-700 dark:text-purple-400 shadow-sm"
+                      ? "bg-white dark:bg-white/[0.05] text-purple-700 dark:text-purple-400 shadow-sm"
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   }`}
                 >
@@ -253,7 +255,7 @@ export default function QuestionPage() {
                   }))
                 }
                 disabled={isGenerating}
-                className="text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-1.5 outline-none focus:border-purple-400 dark:text-slate-200 disabled:opacity-50"
+                className="text-sm bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-lg px-3 py-1.5 outline-none focus:border-purple-400 dark:text-slate-200 disabled:opacity-50"
               >
                 {kbs.map((kb) => (
                   <option key={kb} value={kb}>
@@ -278,7 +280,7 @@ export default function QuestionPage() {
             {!isConfigMode && (
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-1.5 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors"
+                className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-1.5 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg border border-slate-200 dark:border-white/[0.08] transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
                 {t("New")}
@@ -288,7 +290,7 @@ export default function QuestionPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
+        <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-white/[0.03]">
           {/* Config Mode */}
           {isConfigMode && (
             <div className="p-6">
@@ -349,7 +351,7 @@ export default function QuestionPage() {
                           }))
                         }
                         placeholder={t("e.g. Gradient Descent Optimization")}
-                        className="w-full p-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all text-lg dark:text-slate-200 placeholder:text-slate-400"
+                        className="w-full p-4 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all text-lg dark:text-slate-200 placeholder:text-slate-400"
                       />
                     </div>
 
@@ -389,7 +391,7 @@ export default function QuestionPage() {
                               count: Math.max(1, Math.min(50, val)),
                             }));
                           }}
-                          className="w-full p-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-center outline-none focus:border-purple-500 dark:text-slate-200"
+                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl text-center outline-none focus:border-purple-500 dark:text-slate-200"
                         />
                       </div>
 
@@ -405,7 +407,7 @@ export default function QuestionPage() {
                               difficulty: e.target.value,
                             }))
                           }
-                          className="w-full p-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
+                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
                         >
                           <option value="easy">{t("Easy")}</option>
                           <option value="medium">{t("Medium")}</option>
@@ -425,7 +427,7 @@ export default function QuestionPage() {
                               type: e.target.value,
                             }))
                           }
-                          className="w-full p-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
+                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
                         >
                           <option value="choice">{t("Multiple Choice")}</option>
                           <option value="written">{t("Written")}</option>
@@ -452,7 +454,7 @@ export default function QuestionPage() {
                         />
                         <label
                           htmlFor="pdf-upload"
-                          className="flex items-center justify-center gap-3 w-full py-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-all"
+                          className="flex items-center justify-center gap-3 w-full py-8 border-2 border-dashed border-slate-300 dark:border-white/[0.08] rounded-xl cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-all"
                         >
                           {questionState.uploadedFile ? (
                             <div className="flex items-center gap-3 text-purple-700 dark:text-purple-400">
@@ -489,11 +491,11 @@ export default function QuestionPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-600"></div>
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/[0.05]"></div>
                       <span className="text-xs text-slate-400 dark:text-slate-500">
                         {t("OR")}
                       </span>
-                      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-600"></div>
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/[0.05]"></div>
                     </div>
 
                     <div className="space-y-2">
@@ -511,7 +513,7 @@ export default function QuestionPage() {
                           }))
                         }
                         placeholder={t("e.g. 2211asm1")}
-                        className="w-full p-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:border-purple-500 dark:text-slate-200 placeholder:text-slate-400"
+                        className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200 placeholder:text-slate-400"
                       />
                     </div>
                   </div>
@@ -534,8 +536,8 @@ export default function QuestionPage() {
           {!isConfigMode && (
             <div className="flex h-full">
               {/* Left: Question List */}
-              <div className="w-72 flex-shrink-0 border-r border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col">
-                <div className="p-3 border-b border-slate-100 dark:border-slate-700">
+              <div className="w-72 flex-shrink-0 border-r border-slate-100 dark:border-white/[0.08] bg-white dark:bg-white/[0.05] flex flex-col">
+                <div className="p-3 border-b border-slate-100 dark:border-white/[0.08]">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       {t("Questions")}
@@ -545,7 +547,7 @@ export default function QuestionPage() {
                     </span>
                   </div>
                   {isGenerating && questionState.count > 0 && (
-                    <div className="mt-2 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="mt-2 h-1 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
                       <div
                         className="h-full bg-purple-500 transition-all duration-300"
                         style={{
@@ -569,7 +571,7 @@ export default function QuestionPage() {
                       className={`w-full text-left px-3 py-2.5 rounded-lg transition-all mb-1 ${
                         activeIdx === idx
                           ? "bg-purple-50 dark:bg-purple-900/30 border-l-2 border-purple-500"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                          : "hover:bg-slate-50 dark:hover:bg-white/[0.07]"
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -581,7 +583,7 @@ export default function QuestionPage() {
                                 ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600"
                                 : activeIdx === idx
                                   ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600"
-                                  : "bg-slate-100 dark:bg-slate-700 text-slate-500"
+                                  : "bg-slate-100 dark:bg-white/[0.06] text-slate-500"
                           }`}
                         >
                           {result.extended ? (
@@ -621,12 +623,12 @@ export default function QuestionPage() {
                 {currentQuestion ? (
                   <>
                     {/* Question Header */}
-                    <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800">
+                    <div className="px-6 py-3 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between bg-white dark:bg-white/[0.05]">
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium text-slate-500">
                           Question {activeIdx + 1}
                         </span>
-                        <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-500 rounded">
+                        <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-white/[0.06] text-slate-500 rounded">
                           {currentQuestion.question.type ||
                             currentQuestion.question.question_type}
                         </span>
@@ -688,10 +690,10 @@ export default function QuestionPage() {
                                         ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-300"
                                         : isSelected
                                           ? "bg-red-50 dark:bg-red-900/30 border-red-300"
-                                          : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600"
+                                          : "bg-white dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08]"
                                       : isSelected
                                         ? "bg-purple-50 dark:bg-purple-900/30 border-purple-300"
-                                        : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:border-purple-300"
+                                        : "bg-white dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08] hover:border-purple-300"
                                   }`}
                                 >
                                   <span
@@ -704,7 +706,7 @@ export default function QuestionPage() {
                                           ? "bg-red-500 text-white"
                                           : isSelected
                                             ? "bg-purple-500 text-white"
-                                            : "bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
+                                            : "bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300"
                                     }`}
                                   >
                                     {key}
@@ -731,13 +733,13 @@ export default function QuestionPage() {
                           onChange={(e) => handleAnswer(e.target.value)}
                           disabled={submittedMap[activeIdx]}
                           placeholder={t("Type your answer here...")}
-                          className="w-full h-40 p-4 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                          className="w-full h-40 p-4 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                         />
                       )}
 
                       {/* Answer & Explanation (shown after submit) */}
                       {submittedMap[activeIdx] && (
-                        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-white/[0.08]">
                           {/* Correct Answer */}
                           <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800">
                             <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">
@@ -778,17 +780,17 @@ export default function QuestionPage() {
 
                           {/* Relevance Analysis (collapsible) */}
                           {currentQuestion.validation && (
-                            <div className="border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                            <div className="border border-slate-200 dark:border-white/[0.08] rounded-xl overflow-hidden">
                               <button
                                 onClick={() => setShowAnalysis(!showAnalysis)}
-                                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 dark:bg-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors"
                               >
                                 <div className="flex items-center gap-2 text-sm">
                                   <AlertCircle className="w-4 h-4 text-slate-400" />
                                   <span className="font-medium text-slate-600 dark:text-slate-300">
                                     {t("Relevance Analysis")}
                                   </span>
-                                  <span className="text-xs px-1.5 py-0.5 bg-slate-200 dark:bg-slate-600 text-slate-500 rounded">
+                                  <span className="text-xs px-1.5 py-0.5 bg-slate-200 dark:bg-white/[0.05] text-slate-500 rounded">
                                     {currentQuestion.rounds || 1} {t("round")}
                                     {(currentQuestion.rounds || 1) > 1
                                       ? t("s")
@@ -803,7 +805,7 @@ export default function QuestionPage() {
                               </button>
 
                               {showAnalysis && (
-                                <div className="px-4 py-3 space-y-3 text-sm bg-white dark:bg-slate-800">
+                                <div className="px-4 py-3 space-y-3 text-sm bg-white dark:bg-white/[0.05]">
                                   {currentQuestion.validation.kb_coverage && (
                                     <div>
                                       <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">
@@ -927,19 +929,80 @@ export default function QuestionPage() {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+                    <div className="px-6 py-4 border-t border-slate-100 dark:border-white/[0.08] bg-white dark:bg-white/[0.05]">
                       {!submittedMap[activeIdx] ? (
-                        <button
-                          onClick={handleSubmit}
-                          disabled={!userAnswers[activeIdx]}
-                          className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          {t("Submit Answer")}
-                        </button>
+                        <div className="space-y-3">
+                          {/* Confidence Calibration */}
+                          {userAnswers[activeIdx] && (
+                            <div className="p-3 rounded-xl bg-violet-50 dark:bg-violet-500/[0.08] border border-violet-200 dark:border-violet-500/20">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
+                                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                  {t("How confident are you?")}
+                                </span>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                  (confidenceRatings[activeIdx] || 3) >= 4 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" :
+                                  (confidenceRatings[activeIdx] || 3) >= 2 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" :
+                                  "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                                }`}>
+                                  {["", "Guessing", "Unsure", "Somewhat sure", "Confident", "Very confident"][confidenceRatings[activeIdx] || 3]}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-400">1</span>
+                                <input
+                                  type="range"
+                                  min="1"
+                                  max="5"
+                                  value={confidenceRatings[activeIdx] || 3}
+                                  onChange={(e) => setConfidenceRatings(prev => ({ ...prev, [activeIdx]: parseInt(e.target.value) }))}
+                                  className="flex-1 h-2 bg-slate-200 dark:bg-white/[0.08] rounded-full appearance-none cursor-pointer accent-violet-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-violet-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-violet-500/30"
+                                />
+                                <span className="text-[10px] text-slate-400">5</span>
+                              </div>
+                            </div>
+                          )}
+                          <button
+                            onClick={handleSubmit}
+                            disabled={!userAnswers[activeIdx]}
+                            className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                            {t("Submit Answer")}
+                          </button>
+                        </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-xl">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span className="font-medium">{t("Submitted")}</span>
+                        <div className="space-y-2">
+                          {/* Confidence feedback after submission */}
+                          {confidenceRatings[activeIdx] && (() => {
+                            const confidence = confidenceRatings[activeIdx];
+                            const isCorrect = currentQuestion &&
+                              userAnswers[activeIdx] === currentQuestion.question.correct_answer;
+                            const isOverconfident = confidence >= 4 && !isCorrect;
+                            const isUnderconfident = confidence <= 2 && isCorrect;
+
+                            if (isOverconfident || isUnderconfident) {
+                              return (
+                                <div className={`p-3 rounded-xl border text-xs ${
+                                  isOverconfident
+                                    ? "bg-amber-50 dark:bg-amber-500/[0.08] border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-300"
+                                    : "bg-blue-50 dark:bg-blue-500/[0.08] border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300"
+                                }`}>
+                                  <span className="font-bold">
+                                    {isOverconfident ? "Overconfident" : "Underconfident"}:
+                                  </span>{" "}
+                                  {isOverconfident
+                                    ? `You rated ${confidence}/5 confidence but got it wrong. Review this topic more carefully.`
+                                    : `You rated ${confidence}/5 confidence but got it right! Trust your knowledge more.`
+                                  }
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                          <div className="flex items-center justify-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-xl">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span className="font-medium">{t("Submitted")}</span>
+                          </div>
                         </div>
                       )}
                     </div>

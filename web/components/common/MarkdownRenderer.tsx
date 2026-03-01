@@ -25,7 +25,7 @@ export default function MarkdownRenderer({
   const tableComponents = {
     table: ({ node, ...props }: any) => (
       <div
-        className={`overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm ${
+        className={`overflow-x-auto rounded-lg border border-slate-200 dark:border-white/[0.08] shadow-sm ${
           variant === "compact" ? "my-2" : "my-4"
         }`}
       >
@@ -36,11 +36,11 @@ export default function MarkdownRenderer({
       </div>
     ),
     thead: ({ node, ...props }: any) => (
-      <thead className="bg-slate-50 dark:bg-slate-800" {...props} />
+      <thead className="bg-slate-50 dark:bg-white/[0.05]" {...props} />
     ),
     th: ({ node, ...props }: any) => (
       <th
-        className={`text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap border-b border-slate-200 dark:border-slate-700 ${
+        className={`text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap border-b border-slate-200 dark:border-white/[0.08] ${
           variant === "compact" ? "px-2 py-1.5" : "px-3 py-2"
         }`}
         {...props}
@@ -48,13 +48,13 @@ export default function MarkdownRenderer({
     ),
     tbody: ({ node, ...props }: any) => (
       <tbody
-        className="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-slate-900"
+        className="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-white/[0.03]"
         {...props}
       />
     ),
     td: ({ node, ...props }: any) => (
       <td
-        className={`text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700 ${
+        className={`text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-white/[0.08] ${
           variant === "compact" ? "px-2 py-1.5" : "px-3 py-2"
         }`}
         {...props}
@@ -80,7 +80,7 @@ export default function MarkdownRenderer({
       if (inline) {
         return (
           <code
-            className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded text-sm font-mono"
+            className="px-1.5 py-0.5 bg-slate-100 dark:bg-white/[0.05] text-slate-800 dark:text-slate-200 rounded text-sm font-mono"
             {...props}
           >
             {children}

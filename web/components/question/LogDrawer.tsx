@@ -171,8 +171,8 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
       {/* Drawer - matches the app styling */}
       <div
         className={`
-          fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-slate-800
-          border-l border-slate-200 dark:border-slate-700 z-50
+          fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white dark:bg-[#12122a]
+          border-l border-slate-200 dark:border-white/[0.10] z-50
           transform transition-transform duration-300 ease-out
           shadow-2xl
           ${isOpen ? "translate-x-0" : "translate-x-full"}
@@ -180,14 +180,14 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.04] shrink-0">
           <div className="flex items-center gap-3">
             <div
               className={`p-2 rounded-lg ${
                 isComplete
                   ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
                   : isIdle
-                    ? "bg-slate-100 dark:bg-slate-700 text-slate-400"
+                    ? "bg-slate-100 dark:bg-white/[0.06] text-slate-400"
                     : "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"
               }`}
             >
@@ -217,17 +217,17 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded-lg transition-colors"
           >
             <X className="w-4 h-4 text-slate-400" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
+        <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-[#10102a]">
           {/* Topic Info */}
           {!isMimicMode && topic && (
-            <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="px-4 py-4 border-b border-slate-100 dark:border-white/[0.08] bg-white dark:bg-white/[0.05]">
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                 {t("Configuration")}
               </p>
@@ -259,7 +259,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
 
           {/* Mimic Mode Info */}
           {isMimicMode && (
-            <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-700 bg-amber-50 dark:bg-amber-900/20">
+            <div className="px-4 py-4 border-b border-slate-100 dark:border-white/[0.08] bg-amber-50 dark:bg-amber-900/20">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
@@ -274,7 +274,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
 
           {/* Planning Steps Timeline */}
           {!isIdle && (
-            <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="px-4 py-4 border-b border-slate-100 dark:border-white/[0.08] bg-white dark:bg-white/[0.05]">
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
                 {t("Progress")}
               </p>
@@ -287,7 +287,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
                           ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
                           : step.active
                             ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"
-                            : "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
+                            : "bg-slate-100 dark:bg-white/[0.06] text-slate-400 dark:text-slate-500"
                       }`}
                     >
                       {step.done ? (
@@ -317,7 +317,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
 
           {/* Sub-Focuses */}
           {subFocuses.length > 0 && (
-            <div className="px-4 py-4 border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="px-4 py-4 border-b border-slate-100 dark:border-white/[0.08] bg-white dark:bg-white/[0.05]">
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
                 {t("Question Focuses ({n})").replace(
                   "{n}",
@@ -328,7 +328,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
                 {subFocuses.map((focus) => (
                   <div
                     key={focus.id}
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-lg border border-slate-100 dark:border-slate-600"
+                    className="px-3 py-2 bg-slate-50 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 text-xs rounded-lg border border-slate-100 dark:border-white/[0.08]"
                   >
                     <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400 mb-1">
                       <Target className="w-3 h-3" />
@@ -344,7 +344,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
           )}
 
           {/* Live Logs */}
-          <div className="px-4 py-4 bg-white dark:bg-slate-800">
+          <div className="px-4 py-4 bg-white dark:bg-white/[0.05]">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {t("Logs ({n})").replace("{n}", String(logs.length))}
@@ -375,7 +375,7 @@ export const LogDrawer: React.FC<LogDrawerProps> = ({
                         ? "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-100 dark:border-red-800"
                         : log.type === "success"
                           ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800"
-                          : "bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-600"
+                          : "bg-slate-50 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-white/[0.08]"
                     }`}
                   >
                     {log.content}

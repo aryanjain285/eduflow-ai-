@@ -153,7 +153,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 
   // Clickable Step Tabs - rendered as JSX variable instead of component function
   const stepTabsContent = (
-    <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+    <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-white/[0.06] backdrop-blur-sm p-1 rounded-xl border border-slate-200/50 dark:border-white/[0.08] shadow-sm">
       {steps.map((step, idx) => {
         const available = isTabAvailable(step.id);
         const isCurrentStage = isTabCurrentlyActive(step.id);
@@ -169,9 +169,9 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
               flex items-center gap-2 px-4 py-2 rounded-lg transition-all relative
               ${
                 isSelected
-                  ? "bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 text-indigo-700 dark:text-indigo-300"
+                  ? "bg-white dark:bg-white/[0.06] shadow-sm border border-slate-200 dark:border-white/[0.08] text-indigo-700 dark:text-indigo-300"
                   : available
-                    ? "hover:bg-white/50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300"
+                    ? "hover:bg-white/50 dark:hover:bg-white/[0.07]/50 text-slate-600 dark:text-slate-300"
                     : "text-slate-300 dark:text-slate-600 cursor-not-allowed"
               }
             `}
@@ -206,17 +206,17 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   const planningContent = (
     <div className="flex-1 flex items-center justify-center">
       <div
-        className={`bg-white dark:bg-slate-800 rounded-xl border shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-2xl w-full ${
+        className={`bg-white dark:bg-white/[0.05] rounded-xl border shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-2xl w-full ${
           isPlanningActive
             ? "border-blue-200 dark:border-blue-800"
-            : "border-slate-200 dark:border-slate-700"
+            : "border-slate-200 dark:border-white/[0.08]"
         }`}
       >
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
             isPlanningActive
               ? "bg-blue-50 dark:bg-blue-900/40"
-              : "bg-slate-50 dark:bg-slate-700"
+              : "bg-slate-50 dark:bg-white/[0.06]"
           }`}
         >
           <GitBranch
@@ -245,7 +245,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 
         {/* Topic Info */}
         {(planning.originalTopic || planning.optimizedTopic) && (
-          <div className="w-full mt-4 bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-100 dark:border-slate-600 text-left">
+          <div className="w-full mt-4 bg-slate-50 dark:bg-white/[0.06] rounded-lg p-4 border border-slate-100 dark:border-white/[0.08] text-left">
             {planning.originalTopic && (
               <div className="mb-3">
                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
@@ -359,12 +359,12 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   const reportingContent = (
     <div className="flex-1 flex items-center justify-center">
       <div
-        className={`bg-white dark:bg-slate-800 rounded-xl border shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-lg w-full ${
+        className={`bg-white dark:bg-white/[0.05] rounded-xl border shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-lg w-full ${
           isReportingActive
             ? "border-purple-200 dark:border-purple-800"
             : isCompleted
               ? "border-emerald-200 dark:border-emerald-800"
-              : "border-slate-200 dark:border-slate-700"
+              : "border-slate-200 dark:border-white/[0.08]"
         }`}
       >
         <div
@@ -373,7 +373,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
               ? "bg-purple-50 dark:bg-purple-900/40"
               : isCompleted
                 ? "bg-emerald-50 dark:bg-emerald-900/40"
-                : "bg-slate-50 dark:bg-slate-700"
+                : "bg-slate-50 dark:bg-white/[0.06]"
           }`}
         >
           {isCompleted ? (
@@ -476,7 +476,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 
         {/* Outline Preview */}
         {reporting.outline && reporting.outline.sections.length > 0 && (
-          <div className="mt-6 w-full text-left bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-100 dark:border-slate-600 max-h-[200px] overflow-y-auto">
+          <div className="mt-6 w-full text-left bg-slate-50 dark:bg-white/[0.06] rounded-lg p-4 border border-slate-100 dark:border-white/[0.08] max-h-[200px] overflow-y-auto">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
               {t("Report Outline")}
             </p>
@@ -537,14 +537,14 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
   );
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50 dark:bg-slate-900/50">
+    <div className="flex flex-col h-full bg-slate-50/50 dark:bg-white/[0.03]">
       {/* Top Bar: Progress & Global Status */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between shadow-sm shrink-0 z-20 relative">
+      <div className="bg-white dark:bg-white/[0.05] border-b border-slate-200 dark:border-white/[0.08] px-6 py-4 flex items-center justify-between shadow-sm shrink-0 z-20 relative">
         <div className="flex items-center gap-4">
           <div
             className={`p-2 rounded-lg ${
               global.stage === "idle"
-                ? "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
+                ? "bg-slate-100 dark:bg-white/[0.06] text-slate-400 dark:text-slate-500"
                 : global.stage === "completed"
                   ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
                   : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
@@ -594,7 +594,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
         </div>
 
         {/* View Switcher */}
-        <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg border border-slate-200 dark:border-slate-600">
+        <div className="flex bg-slate-100 dark:bg-white/[0.06] p-1 rounded-lg border border-slate-200 dark:border-white/[0.08]">
           <button
             onClick={() => setActiveView("process")}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
@@ -631,8 +631,8 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
           {/* Idle State */}
           {global.stage === "idle" ? (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-lg w-full">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+              <div className="bg-white dark:bg-white/[0.05] rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm p-8 flex flex-col items-center justify-center text-center max-w-lg w-full">
+                <div className="w-16 h-16 bg-slate-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mb-4">
                   <Search className="w-8 h-8 text-slate-400 dark:text-slate-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
@@ -662,7 +662,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
       ) : (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Report Toolbar */}
-          <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-end items-center bg-white dark:bg-slate-800 shrink-0">
+          <div className="px-6 py-3 border-b border-slate-100 dark:border-white/[0.08] flex justify-end items-center bg-white dark:bg-white/[0.05] shrink-0">
             <div className="flex gap-2">
               {onAddToNotebook && (
                 <button
@@ -675,7 +675,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
               {onExportMarkdown && (
                 <button
                   onClick={onExportMarkdown}
-                  className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.07] transition-all"
                 >
                   <Download className="w-4 h-4" /> {t("Markdown")}
                 </button>
@@ -684,7 +684,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
                 <button
                   onClick={onExportPdf}
                   disabled={isExportingPdf}
-                  className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.07] transition-all disabled:opacity-50"
                 >
                   {isExportingPdf ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -699,10 +699,10 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 
           {/* Report Content */}
           <div
-            className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30 p-8"
+            className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-white/[0.03] p-8"
             id="report-scroll-container"
           >
-            <div className="max-w-4xl mx-auto bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-12 min-h-[500px]">
+            <div className="max-w-4xl mx-auto bg-white dark:bg-white/[0.05] rounded-xl shadow-sm border border-slate-200 dark:border-white/[0.08] p-12 min-h-[500px]">
               {reporting.generatedReport ? (
                 <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-800 dark:prose-headings:text-slate-100 prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-img:rounded-xl prose-table:border-collapse prose-th:border prose-th:border-slate-300 dark:prose-th:border-slate-600 prose-th:bg-slate-50 dark:prose-th:bg-slate-700 prose-th:p-2 prose-td:border prose-td:border-slate-200 dark:prose-td:border-slate-600 prose-td:p-2">
                   {/* Add scroll-margin-top style for anchor targets */}
@@ -715,7 +715,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
                     components={{
                       h1: ({ node, ...props }) => (
                         <h1
-                          className="text-3xl font-bold mb-6 pb-2 border-b border-slate-200 dark:border-slate-700"
+                          className="text-3xl font-bold mb-6 pb-2 border-b border-slate-200 dark:border-white/[0.08]"
                           {...props}
                         />
                       ),
@@ -743,26 +743,26 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
                       table: ({ node, ...props }) => (
                         <div className="overflow-x-auto my-6">
                           <table
-                            className="min-w-full border-collapse border border-slate-300 dark:border-slate-600 text-sm"
+                            className="min-w-full border-collapse border border-slate-300 dark:border-white/[0.08] text-sm"
                             {...props}
                           />
                         </div>
                       ),
                       thead: ({ node, ...props }) => (
                         <thead
-                          className="bg-slate-50 dark:bg-slate-700"
+                          className="bg-slate-50 dark:bg-white/[0.06]"
                           {...props}
                         />
                       ),
                       th: ({ node, ...props }) => (
                         <th
-                          className="border border-slate-300 dark:border-slate-600 px-4 py-2 text-left font-semibold text-slate-700 dark:text-slate-200"
+                          className="border border-slate-300 dark:border-white/[0.08] px-4 py-2 text-left font-semibold text-slate-700 dark:text-slate-200"
                           {...props}
                         />
                       ),
                       td: ({ node, ...props }) => (
                         <td
-                          className="border border-slate-200 dark:border-slate-600 px-4 py-2 text-slate-600 dark:text-slate-300"
+                          className="border border-slate-200 dark:border-white/[0.08] px-4 py-2 text-slate-600 dark:text-slate-300"
                           {...props}
                         />
                       ),
@@ -825,7 +825,7 @@ export const ResearchDashboard: React.FC<ResearchDashboardProps> = ({
 
                         return isInline ? (
                           <code
-                            className="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-sm font-mono"
+                            className="bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-sm font-mono"
                             {...props}
                           >
                             {children}

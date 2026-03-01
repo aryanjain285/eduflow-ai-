@@ -147,11 +147,11 @@ export default function SolverSessionDetail({
 
       {/* Modal */}
       <div
-        className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-300"
+        className="relative bg-white dark:bg-white/[0.05] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
+        <div className="p-6 border-b border-slate-100 dark:border-white/[0.08] flex justify-between items-center shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -174,7 +174,7 @@ export default function SolverSessionDetail({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.08] flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -193,7 +193,7 @@ export default function SolverSessionDetail({
           ) : session ? (
             <div className="space-y-4">
               {/* Session Info */}
-              <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+              <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-white/[0.08]">
                 {session.kb_name && (
                   <span className="px-2.5 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex items-center gap-1">
                     <Database className="w-3 h-3" />
@@ -203,12 +203,12 @@ export default function SolverSessionDetail({
                 {session.token_stats && (
                   <>
                     {session.token_stats.model && (
-                      <span className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full">
+                      <span className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 rounded-full">
                         {session.token_stats.model}
                       </span>
                     )}
                     {session.token_stats.tokens > 0 && (
-                      <span className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full">
+                      <span className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 rounded-full">
                         {session.token_stats.tokens.toLocaleString()}{" "}
                         {t("tokens")}
                       </span>
@@ -238,7 +238,7 @@ export default function SolverSessionDetail({
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       msg.role === "user"
                         ? "bg-blue-500 text-white rounded-br-none"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 rounded-bl-none"
                     }`}
                   >
                     {msg.role === "user" ? (
@@ -316,10 +316,10 @@ export default function SolverSessionDetail({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl flex justify-between items-center shrink-0">
+        <div className="p-6 border-t border-slate-100 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.03] rounded-b-2xl flex justify-between items-center shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            className="px-6 py-2.5 bg-slate-200 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-300 dark:hover:bg-white/[0.08] transition-colors"
           >
             {t("Close")}
           </button>

@@ -173,9 +173,9 @@ export default function SolverPage() {
   return (
     <div className="h-screen flex gap-0 animate-fade-in overflow-hidden">
       {/* Left Panel: Chat Interface */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col bg-white dark:bg-white/[0.05] dark:backdrop-blur-xl border-r border-slate-200 dark:border-white/[0.08] overflow-hidden min-h-0">
         {/* Chat Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center backdrop-blur-sm shrink-0">
+        <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.04] flex justify-between items-center backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
             {t("Smart Solver")}
@@ -189,7 +189,7 @@ export default function SolverPage() {
                   selectedKb: e.target.value,
                 }))
               }
-              className="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md px-2 py-1 outline-none focus:border-blue-400 dark:text-slate-200"
+              className="text-xs bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-md px-2 py-1 outline-none focus:border-blue-400 dark:text-slate-200"
             >
               {kbs.map((kb) => (
                 <option key={kb} value={kb}>
@@ -213,7 +213,7 @@ export default function SolverPage() {
         {/* Chat Area */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 dark:bg-slate-900/30 min-h-0"
+          className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 dark:bg-transparent min-h-0"
         >
           {/* Initial State */}
           {solverState.messages.length === 0 && !solverState.isSolving && (
@@ -238,7 +238,7 @@ export default function SolverPage() {
                   <button
                     key={i}
                     onClick={() => setInputQuestion(q)}
-                    className="px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400 transition-all text-left text-slate-600 dark:text-slate-300 shadow-sm"
+                    className="px-4 py-3 bg-white dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400 transition-all text-left text-slate-600 dark:text-slate-300 shadow-sm"
                   >
                     {q}
                   </button>
@@ -255,10 +255,10 @@ export default function SolverPage() {
             >
               {msg.role === "user" ? (
                 <>
-                  <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-white/[0.06] flex items-center justify-center shrink-0">
                     <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                   </div>
-                  <div className="flex-1 bg-slate-100 dark:bg-slate-700 px-5 py-3.5 rounded-2xl rounded-tl-none text-slate-800 dark:text-slate-200 leading-relaxed shadow-sm overflow-hidden min-w-0 break-words">
+                  <div className="flex-1 bg-slate-100 dark:bg-white/[0.06] px-5 py-3.5 rounded-2xl rounded-tl-none text-slate-800 dark:text-slate-200 leading-relaxed shadow-sm overflow-hidden min-w-0 break-words">
                     <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:shadow-inner prose-pre:overflow-x-auto prose-code:break-words prose-a:break-all">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkMath]}
@@ -327,10 +327,10 @@ export default function SolverPage() {
                 </>
               ) : (
                 <>
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
                     <Bot className="w-5 h-5 text-white" />
                   </div>
-                  <div className="flex-1 bg-white dark:bg-slate-800 px-6 py-5 rounded-2xl rounded-tl-none border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-w-0 break-words">
+                  <div className="flex-1 bg-white dark:bg-white/[0.05] px-6 py-5 rounded-2xl rounded-tl-none border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden min-w-0 break-words">
                     <div className="prose prose-slate dark:prose-invert prose-blue max-w-none prose-headings:font-bold prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:shadow-inner prose-pre:overflow-x-auto prose-code:break-words prose-a:break-all">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkMath]}
@@ -395,7 +395,7 @@ export default function SolverPage() {
                         {processLatexContent(msg.content)}
                       </ReactMarkdown>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium">
                         <CheckCircle2 className="w-4 h-4" />
                         {t("Verified by EduFlow Logic Engine")}
@@ -439,16 +439,16 @@ export default function SolverPage() {
           {/* AI Thinking State */}
           {solverState.isSolving && (
             <div className="flex gap-4 w-full animate-in fade-in slide-in-from-bottom-2">
-              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
                 <Loader2 className="w-5 h-5 text-white animate-spin" />
               </div>
               <div className="flex flex-col gap-2 flex-1 min-w-0">
-                <div className="bg-white dark:bg-slate-800 px-5 py-4 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div className="bg-white dark:bg-white/[0.05] px-5 py-4 rounded-2xl rounded-tl-none border border-slate-100 dark:border-white/[0.08] shadow-sm">
                   {/* Stage Display */}
                   <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 text-sm mb-3">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
                     </span>
                     <span className="font-semibold">
                       {solverState.progress.stage === "investigate" &&
@@ -514,8 +514,8 @@ export default function SolverPage() {
 
                   {!solverState.progress.stage && (
                     <>
-                      <div className="h-2 w-32 bg-slate-100 dark:bg-slate-700 rounded animate-pulse mb-2"></div>
-                      <div className="h-2 w-48 bg-slate-100 dark:bg-slate-700 rounded animate-pulse"></div>
+                      <div className="h-2 w-32 bg-slate-100 dark:bg-white/[0.06] rounded animate-pulse mb-2"></div>
+                      <div className="h-2 w-48 bg-slate-100 dark:bg-white/[0.06] rounded animate-pulse"></div>
                     </>
                   )}
                 </div>
@@ -526,11 +526,11 @@ export default function SolverPage() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 shrink-0">
+        <div className="p-4 bg-white dark:bg-white/[0.05] dark:backdrop-blur-xl border-t border-slate-100 dark:border-white/[0.08] shrink-0">
           <div className="w-full relative">
             <input
               type="text"
-              className="w-full px-5 py-4 pr-32 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-700 dark:text-slate-200 shadow-inner"
+              className="w-full px-5 py-4 pr-32 bg-slate-50 dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-700 dark:text-slate-200 shadow-inner"
               placeholder={t("Ask a difficult question...")}
               value={inputQuestion}
               onChange={(e) => setInputQuestion(e.target.value)}
@@ -541,7 +541,7 @@ export default function SolverPage() {
               <button
                 onClick={handleStart}
                 disabled={solverState.isSolving || !inputQuestion.trim()}
-                className="h-full aspect-square bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-all shadow-md shadow-blue-500/20"
+                className="h-full aspect-square bg-gradient-to-br from-violet-500 to-blue-600 text-white rounded-lg flex items-center justify-center hover:from-violet-600 hover:to-blue-700 disabled:opacity-50 disabled:hover:from-violet-500 disabled:hover:to-blue-600 transition-all shadow-md shadow-blue-500/20"
               >
                 {solverState.isSolving ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -560,9 +560,9 @@ export default function SolverPage() {
       </div>
 
       {/* Right Panel: Logic Stream - Modern Light Theme */}
-      <div className="w-[400px] flex-shrink-0 bg-white dark:bg-slate-800 flex flex-col overflow-hidden border-l border-slate-200 dark:border-slate-700 h-full">
+      <div className="w-[400px] flex-shrink-0 bg-white dark:bg-white/[0.05] dark:backdrop-blur-xl flex flex-col overflow-hidden border-l border-slate-200 dark:border-white/[0.08] h-full">
         {/* Header */}
-        <div className="px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0">
+        <div className="px-4 py-3 bg-slate-50/50 dark:bg-white/[0.04] border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
             <Activity className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             {t("Logic Stream")}
@@ -580,7 +580,7 @@ export default function SolverPage() {
 
         {/* Performance & Cost - Horizontal Layout */}
         {solverState.tokenStats.calls > 0 && (
-          <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 shrink-0">
+          <div className="px-4 py-2.5 bg-slate-50 dark:bg-white/[0.04] border-b border-slate-100 dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-3 flex-wrap text-xs">
               <div className="flex items-center gap-1.5">
                 <Cpu className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
@@ -692,7 +692,7 @@ export default function SolverPage() {
 
         {/* Activity Log */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0">
+          <div className="px-4 py-2 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between shrink-0">
             <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Terminal className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
               {t("Activity Log")}
@@ -854,10 +854,10 @@ export default function SolverPage() {
                       " bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-l-2 border-amber-300 dark:border-amber-500";
                   } else if (status === "skip") {
                     className +=
-                      " bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-l-2 border-slate-200 dark:border-slate-600";
+                      " bg-slate-50 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400 border-l-2 border-slate-200 dark:border-white/[0.08]";
                   } else {
                     className +=
-                      " bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
+                      " bg-slate-50 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400";
                   }
                 } else if (isSeparator) {
                   className +=
@@ -879,7 +879,7 @@ export default function SolverPage() {
                     " bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-200 dark:border-emerald-500";
                 } else if (isActionLine) {
                   className +=
-                    " bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 pl-4";
+                    " bg-slate-50 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 pl-4";
                 } else if (isComplete) {
                   className +=
                     " bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300";
@@ -888,10 +888,10 @@ export default function SolverPage() {
                     " bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300";
                 } else if (isSkip) {
                   className +=
-                    " bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500";
+                    " bg-slate-50 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500";
                 } else {
                   className +=
-                    " bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700";
+                    " bg-slate-50 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06]";
                 }
 
                 return (

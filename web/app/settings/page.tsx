@@ -92,14 +92,14 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-white/[0.03] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-white/[0.03]">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         </div>
 
         {/* General Settings - Theme & Language */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 mb-6">
+        <div className="bg-white dark:bg-white/[0.05] rounded-2xl border border-slate-200 dark:border-white/[0.08] p-4 mb-6">
           <div className="flex flex-wrap items-center gap-6">
             {/* Theme Toggle */}
             <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                 )}
                 <span>{t("Theme")}</span>
               </div>
-              <div className="flex p-1 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <div className="flex p-1 bg-slate-100 dark:bg-white/[0.06] rounded-lg">
                 <button
                   onClick={() => updateTheme("light")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
@@ -156,7 +156,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Separator */}
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+            <div className="h-8 w-px bg-slate-200 dark:bg-white/[0.06] hidden sm:block" />
 
             {/* Language Selector */}
             <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                 <Globe className="w-4 h-4" />
                 <span>{t("Language")}</span>
               </div>
-              <div className="flex p-1 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <div className="flex p-1 bg-slate-100 dark:bg-white/[0.06] rounded-lg">
                 {LANGUAGE_OPTIONS.map((lang) => (
                   <button
                     key={lang.value}
@@ -182,7 +182,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Separator */}
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+            <div className="h-8 w-px bg-slate-200 dark:bg-white/[0.06] hidden sm:block" />
 
             {/* Clear Data */}
             <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ export default function SettingsPage() {
         {/* Clear Confirmation Modal */}
         {showClearConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 max-w-md mx-4 shadow-2xl">
+            <div className="bg-white dark:bg-white/[0.05] rounded-2xl border border-slate-200 dark:border-white/[0.08] p-6 max-w-md mx-4 shadow-2xl">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
                   <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -230,7 +230,7 @@ export default function SettingsPage() {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowClearConfirm(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] transition-all"
                 >
                   {t("Cancel")}
                 </button>
@@ -250,14 +250,14 @@ export default function SettingsPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-6">
+        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-white/[0.05] rounded-xl mb-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                  ? "bg-white dark:bg-white/[0.06] text-blue-600 dark:text-blue-400 shadow-sm"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
@@ -268,7 +268,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-white/[0.05] rounded-2xl border border-slate-200 dark:border-white/[0.08] overflow-hidden">
           {activeTab === "overview" && (
             <OverviewTab
               status={status}

@@ -187,7 +187,7 @@ export default function ConfigTab({
             className={`p-4 rounded-xl border transition-all ${
               config.is_active
                 ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20"
-                : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                : "border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.05]"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -201,7 +201,7 @@ export default function ConfigTab({
                       {config.name}
                     </span>
                     {config.is_default && (
-                      <span className="px-2 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded">
+                      <span className="px-2 py-0.5 text-xs bg-slate-200 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 rounded">
                         {t("Default")}
                       </span>
                     )}
@@ -246,7 +246,7 @@ export default function ConfigTab({
                   <button
                     onClick={() => testConnection(config)}
                     disabled={testing === config.id}
-                    className="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded-lg transition-colors"
                   >
                     {testing === config.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -261,7 +261,7 @@ export default function ConfigTab({
                       setEditingConfig(config);
                       setShowAddForm(false);
                     }}
-                    className="p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded-lg transition-colors"
                     title={t("Edit")}
                   >
                     <Pencil className="w-4 h-4" />

@@ -30,7 +30,7 @@ DEFAULT_SIDEBAR_NAV_ORDER = {
 DEFAULT_UI_SETTINGS = {
     "theme": "light",
     "language": "en",
-    "sidebar_description": "✨ Data Intelligence Lab @ HKU",
+    "sidebar_description": "EduFlow AI",
     "sidebar_nav_order": DEFAULT_SIDEBAR_NAV_ORDER,
 }
 

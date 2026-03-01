@@ -63,7 +63,7 @@ export default function OverviewTab({
               className={`p-4 rounded-xl border ${
                 isConfigured
                   ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
-                  : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                  : "border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.05]"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -72,7 +72,7 @@ export default function OverviewTab({
                     className={`p-2 rounded-lg ${
                       isConfigured
                         ? "bg-green-100 dark:bg-green-800/50"
-                        : "bg-slate-100 dark:bg-slate-700"
+                        : "bg-slate-100 dark:bg-white/[0.06]"
                     }`}
                   >
                     <Icon
@@ -99,7 +99,7 @@ export default function OverviewTab({
                 )}
               </div>
               {s?.model && (
-                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/[0.08]">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-slate-500 dark:text-slate-400">
                       {t("Model")}:
@@ -127,7 +127,7 @@ export default function OverviewTab({
 
       {/* Port Information */}
       {ports && (
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="p-4 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.05]">
           <div className="flex items-center gap-2 mb-3">
             <Server className="w-5 h-5 text-slate-400" />
             <h3 className="font-semibold text-slate-900 dark:text-slate-100">

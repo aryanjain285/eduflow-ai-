@@ -72,7 +72,7 @@ export default function FolderSyncManager({
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700 animate-fade-in">
+          <div className="bg-white dark:bg-white/[0.05] rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-200 dark:border-white/[0.08] animate-fade-in">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <FolderOpen className="w-5 h-5 text-emerald-500" />
@@ -110,7 +110,7 @@ export default function FolderSyncManager({
                   value={folderPath}
                   onChange={(e) => setFolderPath(e.target.value)}
                   placeholder={t("Paste or type the full folder path")}
-                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-white/[0.08] rounded-xl bg-slate-50 dark:bg-white/[0.06] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
                 <div className="mt-2 space-y-1">
                   <p className="text-xs text-slate-400 dark:text-slate-500">
@@ -124,7 +124,7 @@ export default function FolderSyncManager({
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+              <div className="bg-slate-50 dark:bg-white/[0.06] rounded-lg p-3">
                 <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                   {t("📄 Supported files: PDF, DOCX, TXT, MD")}
                 </p>
@@ -148,7 +148,7 @@ export default function FolderSyncManager({
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-white/[0.07]"
                 >
                   {t("Cancel")}
                 </button>

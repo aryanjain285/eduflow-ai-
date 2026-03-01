@@ -56,7 +56,7 @@ export const ActiveTaskDetail: React.FC<ActiveTaskDetailProps> = ({ task }) => {
 
   if (!task) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+      <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-white/[0.05] rounded-xl border border-slate-200 dark:border-white/[0.08]">
         <Terminal className="w-12 h-12 mb-3 opacity-20" />
         <p className="text-sm">
           {t("Select a task to view execution details")}
@@ -66,9 +66,9 @@ export const ActiveTaskDetail: React.FC<ActiveTaskDetailProps> = ({ task }) => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div className="h-full flex flex-col bg-white dark:bg-white/[0.05] rounded-xl border border-slate-200 dark:border-white/[0.08] shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+      <div className="p-4 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.05] flex justify-between items-center">
         <div className="flex items-center gap-2 overflow-hidden">
           <Terminal className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
           <h3
@@ -90,7 +90,7 @@ export const ActiveTaskDetail: React.FC<ActiveTaskDetailProps> = ({ task }) => {
                   ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
                   : task.status === "failed"
                     ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300"
-                    : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                    : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400"
             }`}
           >
             {task.status}
@@ -120,13 +120,13 @@ export const ActiveTaskDetail: React.FC<ActiveTaskDetailProps> = ({ task }) => {
                         ? "bg-violet-50 dark:bg-violet-900/40 border-violet-200 dark:border-violet-800"
                         : thought.type === "tool_call"
                           ? "bg-amber-50 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800"
-                          : "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
+                          : "bg-slate-50 dark:bg-white/[0.06] border-slate-200 dark:border-white/[0.08]"
                   }`}
                 >
                   {getThoughtIcon(thought.type)}
                 </div>
                 {idx < task.thoughts.length - 1 && (
-                  <div className="w-px h-full bg-slate-100 dark:bg-slate-700 my-1 group-hover:bg-slate-200 dark:group-hover:bg-slate-600 transition-colors" />
+                  <div className="w-px h-full bg-slate-100 dark:bg-white/[0.06] my-1 group-hover:bg-slate-200 dark:group-hover:bg-slate-600 transition-colors" />
                 )}
               </div>
 
@@ -151,7 +151,7 @@ export const ActiveTaskDetail: React.FC<ActiveTaskDetailProps> = ({ task }) => {
                   </span>
                 </div>
 
-                <div className="text-slate-700 dark:text-slate-200 leading-relaxed bg-slate-50/50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100/50 dark:border-slate-600/50">
+                <div className="text-slate-700 dark:text-slate-200 leading-relaxed bg-slate-50/50 dark:bg-white/[0.06] rounded-lg p-3 border border-slate-100/50 dark:border-white/[0.08]">
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => (

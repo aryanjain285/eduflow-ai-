@@ -15,10 +15,9 @@ export function useKaTeXInjection() {
       htmlLower.includes("cdn.jsdelivr.net/npm/katex") ||
       htmlLower.includes("unpkg.com/katex");
 
-    if (hasKaTeX) {
-      console.log("KaTeX already included in HTML, skipping injection");
-      return html;
-    }
+    // Even if KaTeX CDN is already present, we still need our init script
+    // to configure proper delimiters (default auto-render doesn't support $...$)
+    const cdnAlreadyPresent = hasKaTeX;
 
     // KaTeX CDN links (using version 0.16.9 for compatibility)
     const katexCSS =
@@ -26,9 +25,32 @@ export function useKaTeXInjection() {
     const katexJS =
       '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>';
     const katexAutoRender =
-      '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117n7w6ODWgRrA7TlVzRsFtwW3ZxUo8h4w20Z5J3d3xjfcw" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>';
+      '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117n7w6ODWgRrA7TlVzRsFtwW3ZxUo8h4w20Z5J3d3xjfcw" crossorigin="anonymous"></script>';
+    // Separate script to configure auto-render with proper delimiters including $...$ for inline math
+    const katexInit = `<script>
+document.addEventListener("DOMContentLoaded", function() {
+  function tryRender() {
+    if (typeof renderMathInElement === "function") {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\\\(", right: "\\\\)", display: false},
+          {left: "\\\\[", right: "\\\\]", display: true}
+        ],
+        throwOnError: false
+      });
+    } else {
+      setTimeout(tryRender, 100);
+    }
+  }
+  tryRender();
+});
+</script>`;
 
-    const katexInjection = `  ${katexCSS}\n  ${katexJS}\n  ${katexAutoRender}`;
+    const katexInjection = cdnAlreadyPresent
+      ? `  ${katexInit}`
+      : `  ${katexCSS}\n  ${katexJS}\n  ${katexAutoRender}\n  ${katexInit}`;
 
     // Try to inject into </head> section (most common case)
     if (html.includes("</head>")) {

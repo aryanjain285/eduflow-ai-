@@ -140,7 +140,7 @@ export default function GuidePage() {
         <div className="absolute top-4 left-4 z-20 flex gap-2">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            className="p-2 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
             title={
               sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")
             }
@@ -154,7 +154,7 @@ export default function GuidePage() {
           {!sidebarCollapsed && (
             <button
               onClick={() => setSidebarWide(!sidebarWide)}
-              className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              className="p-2 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
               title={
                 sidebarWide
                   ? t("Switch to narrow sidebar (1:3)")
@@ -170,7 +170,7 @@ export default function GuidePage() {
 
         {/* Content based on state */}
         {sessionState.status === "idle" ? (
-          <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 p-8">
+          <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 p-8">
             <GraduationCap className="w-24 h-24 text-slate-200 dark:text-slate-600 mb-6" />
             <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">
               {t("Guided Learning")}
@@ -190,12 +190,43 @@ export default function GuidePage() {
             loadingMessage={loadingMessage}
             onOpenDebugModal={() => setShowDebugModal(true)}
           />
-        ) : (
-          <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 p-8">
-            <Loader2 className="w-12 h-12 text-indigo-400 dark:text-indigo-500 animate-spin mb-4" />
-            <p className="text-slate-500 dark:text-slate-400">
-              {loadingMessage || t("Loading learning content...")}
+        ) : isLoading ? (
+          <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col items-center justify-center p-8">
+            <Loader2 className="w-12 h-12 text-violet-500 dark:text-violet-400 animate-spin mb-4" />
+            <p className="text-slate-600 dark:text-slate-300 font-medium">
+              {loadingMessage || t("Generating interactive learning page...")}
             </p>
+            <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">
+              {t("This may take a moment...")}
+            </p>
+          </div>
+        ) : (
+          /* "initialized" state - plan ready, waiting for user to click Start Learning */
+          <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col items-center justify-center p-8">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-violet-500/25">
+              <GraduationCap className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+              {t("Learning Plan Ready")}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm text-center mb-6 leading-relaxed">
+              {t("{n} knowledge points identified. Click \"Start Learning\" in the left panel to begin your personalized learning journey.").replace("{n}", String(sessionState.knowledge_points.length))}
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center max-w-lg">
+              {sessionState.knowledge_points.slice(0, 6).map((kp, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 rounded-full text-xs font-medium border border-violet-100 dark:border-violet-500/20"
+                >
+                  {kp.knowledge_title}
+                </span>
+              ))}
+              {sessionState.knowledge_points.length > 6 && (
+                <span className="px-3 py-1.5 text-slate-400 dark:text-slate-500 text-xs">
+                  +{sessionState.knowledge_points.length - 6} {t("more")}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

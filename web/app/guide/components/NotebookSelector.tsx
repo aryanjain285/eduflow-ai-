@@ -53,8 +53,8 @@ export default function NotebookSelector({
 }: NotebookSelectorProps) {
   const { t } = useTranslation();
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+    <div className="bg-white dark:bg-[#14142a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.10] flex flex-col overflow-hidden">
+      <div className="p-3 border-b border-slate-100 dark:border-white/[0.08] bg-slate-50/50 dark:bg-white/[0.04] flex justify-between items-center">
         <h2 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           {t("Select Source (Cross-Notebook)")}
@@ -92,7 +92,7 @@ export default function NotebookSelector({
                 <div key={notebook.id}>
                   {/* Notebook Header */}
                   <div
-                    className="p-3 flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                    className="p-3 flex items-center gap-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.07]/50 transition-colors"
                     onClick={() => onToggleExpanded(notebook.id)}
                   >
                     {isExpanded ? (
@@ -121,7 +121,7 @@ export default function NotebookSelector({
 
                   {/* Records List */}
                   {isExpanded && (
-                    <div className="pl-6 pr-2 pb-2 bg-slate-50/50 dark:bg-slate-800/50">
+                    <div className="pl-6 pr-2 pb-2 bg-slate-50/50 dark:bg-white/[0.04]">
                       {isLoadingRecords ? (
                         <div className="flex items-center justify-center py-4">
                           <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
@@ -167,7 +167,7 @@ export default function NotebookSelector({
                                 className={`p-2 rounded-lg cursor-pointer transition-all border ${
                                   selectedRecords.has(record.id)
                                     ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700"
-                                    : "hover:bg-white dark:hover:bg-slate-700 border-transparent hover:border-slate-200 dark:hover:border-slate-600"
+                                    : "hover:bg-white dark:hover:bg-white/[0.07] border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                                 }`}
                               >
                                 <div className="flex items-center gap-2">
@@ -208,11 +208,11 @@ export default function NotebookSelector({
       </div>
 
       {/* Generate Button */}
-      <div className="p-3 border-t border-slate-100 dark:border-slate-700">
+      <div className="p-3 border-t border-slate-100 dark:border-white/[0.08]">
         <button
           onClick={onCreateSession}
           disabled={isLoading || selectedRecords.size === 0}
-          className="w-full px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-md shadow-indigo-500/20"
+          className="w-full px-4 py-2.5 bg-gradient-to-r from-violet-500 to-blue-600 text-white rounded-xl hover:from-violet-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-md shadow-violet-500/20"
         >
           {isLoading ? (
             <>

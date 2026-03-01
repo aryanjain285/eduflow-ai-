@@ -278,7 +278,7 @@ export default function ConfigForm({
             onChange={(e) => setName(e.target.value)}
             required
             placeholder={t("My Configuration")}
-            className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 bg-white dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.08] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
@@ -291,7 +291,7 @@ export default function ConfigForm({
             <select
               value={provider}
               onChange={(e) => handleProviderChange(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.08] rounded-lg text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {PROVIDER_OPTIONS[configType].map((p) => (
                 <option key={p} value={p}>
@@ -330,7 +330,7 @@ export default function ConfigForm({
                   className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     useEnvBaseUrl
                       ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 italic"
-                      : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600"
+                      : "bg-white dark:bg-white/[0.05] border-slate-300 dark:border-white/[0.08]"
                   }`}
                 />
               </div>
@@ -381,7 +381,7 @@ export default function ConfigForm({
                 className={`w-full px-3 py-2 pr-10 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   useEnvApiKey
                     ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 italic"
-                    : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600"
+                    : "bg-white dark:bg-white/[0.05] border-slate-300 dark:border-white/[0.08]"
                 }`}
               />
               {!useEnvApiKey && (
@@ -427,7 +427,7 @@ export default function ConfigForm({
               onChange={(e) => setModel(e.target.value)}
               required
               placeholder={t("gpt-4o")}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.08] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         )}
@@ -442,7 +442,7 @@ export default function ConfigForm({
               type="number"
               value={Number.isNaN(dimensions) ? "" : dimensions}
               onChange={(e) => setDimensions(parseInt(e.target.value, 10))}
-              className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.08] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         )}
@@ -457,7 +457,7 @@ export default function ConfigForm({
               <select
                 value={voice}
                 onChange={(e) => setVoice(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-white/[0.05] border border-slate-300 dark:border-white/[0.08] rounded-lg text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {VOICE_OPTIONS.map((v) => (
                   <option key={v} value={v}>
@@ -479,7 +479,7 @@ export default function ConfigForm({
               type="button"
               onClick={handleTestConnection}
               disabled={testing || (!baseUrl && !useEnvBaseUrl)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.07] disabled:opacity-50 rounded-lg transition-colors"
             >
               {testing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

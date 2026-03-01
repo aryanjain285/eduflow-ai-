@@ -33,9 +33,9 @@ export default function RootLayout({
         <GlobalProvider>
           <I18nClientBridge>
             <LayoutWrapper>
-              <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
+              <div className="relative flex h-screen bg-slate-50 dark:bg-[#050510] mesh-bg overflow-hidden transition-colors duration-200 noise-overlay">
                 <Sidebar />
-                <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+                <main className="relative z-[2] flex-1 overflow-y-auto bg-slate-50/80 dark:bg-transparent">
                   {children}
                 </main>
               </div>
