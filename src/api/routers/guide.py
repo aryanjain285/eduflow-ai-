@@ -5,6 +5,7 @@ Guided Learning API Router
 Provides session creation, learning progress management, and chat interaction.
 """
 
+import json
 from pathlib import Path
 import sys
 
@@ -331,6 +332,37 @@ async def websocket_guide(websocket: WebSocket, session_id: str):
             await websocket.close()
         except (RuntimeError, WebSocketDisconnect, ConnectionError):
             pass  # Connection already closed
+
+
+GUIDE_DIR = project_root / "data" / "user" / "guide"
+
+
+@router.get("/sessions")
+async def list_guide_sessions():
+    """List all guide learning sessions with summary info."""
+    sessions = []
+    if not GUIDE_DIR.exists():
+        return sessions
+
+    for f in sorted(GUIDE_DIR.glob("session_*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        try:
+            with open(f, encoding="utf-8") as fh:
+                data = json.load(fh)
+            kps = data.get("knowledge_points", [])
+            sessions.append({
+                "session_id": data.get("session_id", ""),
+                "notebook_name": data.get("notebook_name", "Unknown"),
+                "status": data.get("status", "unknown"),
+                "created_at": data.get("created_at", 0),
+                "current_index": data.get("current_index", 0),
+                "total_points": len(kps),
+                "knowledge_points": [kp.get("knowledge_title", "") for kp in kps],
+                "has_summary": bool(data.get("summary")),
+            })
+        except Exception:
+            continue
+
+    return sessions
 
 
 @router.get("/health")

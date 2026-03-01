@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
@@ -17,8 +16,6 @@ import {
   Book,
   GraduationCap,
   Lightbulb,
-  Github,
-  Globe,
   ChevronsLeft,
   ChevronsRight,
   GripVertical,
@@ -251,27 +248,15 @@ export default function Sidebar() {
           <div
             className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                <Image
-                  src="/logo.png"
-                  alt={t("EduFlow Logo")}
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              <h1
-                className={`font-bold text-slate-900 dark:text-slate-100 tracking-tight text-base whitespace-nowrap transition-all duration-300 ${
-                  sidebarCollapsed
-                    ? "opacity-0 w-0 overflow-hidden"
-                    : "opacity-100"
-                }`}
-              >
-                EduFlow
-              </h1>
-            </div>
+            <h1
+              className={`font-bold text-slate-900 dark:text-slate-100 tracking-tight text-base whitespace-nowrap transition-all duration-300 ${
+                sidebarCollapsed
+                  ? "opacity-0 w-0 overflow-hidden"
+                  : "opacity-100"
+              }`}
+            >
+              EduFlow AI
+            </h1>
             <div
               className={`flex items-center gap-0.5 transition-all duration-300 ${
                 sidebarCollapsed
@@ -287,24 +272,6 @@ export default function Sidebar() {
               >
                 <ChevronsLeft className="w-4 h-4" />
               </button>
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-400 hover:text-violet-500 dark:hover:text-violet-400 p-1.5 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-colors"
-                title={t("Visit EduFlow Homepage")}
-              >
-                <Globe className="w-4 h-4" />
-              </a>
-              <a
-                href="https://github.com/eduflow-ai/EduFlow"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-1.5 hover:bg-slate-100 dark:hover:bg-white/[0.07] rounded transition-colors"
-                title={t("View on GitHub")}
-              >
-                <Github className="w-4 h-4" />
-              </a>
             </div>
           </div>
 

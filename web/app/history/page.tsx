@@ -18,6 +18,9 @@ import {
   MessageSquare,
   Loader2,
   Eye,
+  GraduationCap,
+  BookOpen,
+  Play,
 } from "lucide-react";
 import { apiUrl } from "@/lib/api";
 import { formatDate } from "@/lib/datetime";
@@ -72,6 +75,30 @@ interface ChatSession {
   updated_at: number;
 }
 
+// Guide session interface
+interface GuideSession {
+  session_id: string;
+  notebook_name: string;
+  status: string;
+  created_at: number;
+  current_index: number;
+  total_points: number;
+  knowledge_points: string[];
+  has_summary: boolean;
+}
+
+// Question batch interface
+interface QuestionBatch {
+  batch_id: string;
+  timestamp: string;
+  topic: string;
+  difficulty: string;
+  question_type: string;
+  requested: number;
+  completed: number;
+  failed: number;
+}
+
 // Solver session interface
 interface SolverSession {
   session_id: string;
@@ -97,6 +124,8 @@ export default function HistoryPage() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [solverSessions, setSolverSessions] = useState<SolverSession[]>([]);
+  const [guideSessions, setGuideSessions] = useState<GuideSession[]>([]);
+  const [questionBatches, setQuestionBatches] = useState<QuestionBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [loadingSolverSessionId, setLoadingSolverSessionId] = useState<
@@ -160,6 +189,34 @@ export default function HistoryPage() {
         }
       } else {
         setSolverSessions([]);
+      }
+
+      // Fetch guide sessions
+      if (filterType === "all" || filterType === "guide") {
+        try {
+          const guideRes = await fetch(apiUrl("/api/v1/guide/sessions"));
+          const guideData = await guideRes.json();
+          setGuideSessions(guideData);
+        } catch (err) {
+          console.error("Failed to fetch guide sessions:", err);
+          setGuideSessions([]);
+        }
+      } else {
+        setGuideSessions([]);
+      }
+
+      // Fetch question batches
+      if (filterType === "all" || filterType === "question") {
+        try {
+          const qRes = await fetch(apiUrl("/api/v1/question/batches"));
+          const qData = await qRes.json();
+          setQuestionBatches(qData);
+        } catch (err) {
+          console.error("Failed to fetch question batches:", err);
+          setQuestionBatches([]);
+        }
+      } else {
+        setQuestionBatches([]);
       }
     } catch (err) {
       console.error("Failed to fetch history:", err);
@@ -286,6 +343,7 @@ export default function HistoryPage() {
             <div className="flex bg-slate-100 dark:bg-white/[0.05] rounded-lg p-1">
               {[
                 { value: "all", label: t("All") },
+                { value: "guide", label: t("Guide") },
                 { value: "chat", label: t("Chat") },
                 { value: "solve", label: t("Solve") },
                 { value: "question", label: t("Question") },
@@ -319,7 +377,9 @@ export default function HistoryPage() {
             </div>
           ) : filteredEntries.length === 0 &&
             chatSessions.length === 0 &&
-            solverSessions.length === 0 ? (
+            solverSessions.length === 0 &&
+            guideSessions.length === 0 &&
+            questionBatches.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-slate-50 dark:bg-white/[0.06] rounded-full flex items-center justify-center mx-auto mb-4">
                 <History className="w-8 h-8 text-slate-300 dark:text-slate-500" />
@@ -604,6 +664,226 @@ export default function HistoryPage() {
                             )}
                             {t("Continue")}
                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+        {/* Guide Sessions Section */}
+        {guideSessions.length > 0 &&
+          (filterType === "all" || filterType === "guide") && (
+            <div className="bg-white dark:bg-white/[0.05] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.08] flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-teal-500" />
+                <h2 className="font-semibold text-slate-900 dark:text-slate-100">
+                  {t("Guided Learning Sessions")}
+                </h2>
+                <span className="text-xs text-slate-400 ml-auto">
+                  {guideSessions.length}{" "}
+                  {t(guideSessions.length === 1 ? "session" : "sessions")}
+                </span>
+              </div>
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {guideSessions
+                  .filter((session) => {
+                    if (!searchQuery.trim()) return true;
+                    const query = searchQuery.toLowerCase();
+                    return (
+                      session.notebook_name.toLowerCase().includes(query) ||
+                      session.knowledge_points.some((kp) =>
+                        kp.toLowerCase().includes(query),
+                      )
+                    );
+                  })
+                  .map((session) => {
+                    const progress =
+                      session.total_points > 0
+                        ? Math.round(
+                            (session.current_index / session.total_points) *
+                              100,
+                          )
+                        : 0;
+                    const isComplete =
+                      session.status === "completed" || session.has_summary;
+
+                    return (
+                      <div
+                        key={session.session_id}
+                        className="px-5 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors group cursor-pointer"
+                        onClick={() =>
+                          router.push(`/guide?session=${session.session_id}`)
+                        }
+                      >
+                        <div className="flex gap-4">
+                          <div className="mt-0.5">
+                            <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                              <BookOpen className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1">
+                                  {t("Guide")}
+                                </span>
+                                <span
+                                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    isComplete
+                                      ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                                      : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                                  }`}
+                                >
+                                  {isComplete ? t("Completed") : t("In Progress")}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatDate(
+                                  new Date(session.created_at * 1000),
+                                  uiSettings.language,
+                                )}
+                              </span>
+                            </div>
+                            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 truncate pr-4">
+                              {session.notebook_name}
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className="text-xs text-slate-400 dark:text-slate-500">
+                                {session.current_index}/{session.total_points}{" "}
+                                {t("topics")}
+                              </span>
+                              {/* Progress bar */}
+                              <div className="flex-1 max-w-[200px] h-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all ${
+                                    isComplete
+                                      ? "bg-emerald-500"
+                                      : "bg-teal-500"
+                                  }`}
+                                  style={{
+                                    width: `${isComplete ? 100 : progress}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-slate-400">
+                                {isComplete ? "100" : progress}%
+                              </span>
+                            </div>
+                            {/* Knowledge point pills */}
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {session.knowledge_points
+                                .slice(0, 3)
+                                .map((kp, i) => (
+                                  <span
+                                    key={i}
+                                    className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 rounded-full truncate max-w-[200px]"
+                                  >
+                                    {kp}
+                                  </span>
+                                ))}
+                              {session.knowledge_points.length > 3 && (
+                                <span className="text-xs text-slate-400">
+                                  +{session.knowledge_points.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="self-center flex items-center gap-2">
+                            {!isComplete && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(
+                                    `/guide?session=${session.session_id}`,
+                                  );
+                                }}
+                                className="px-3 py-1.5 text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg hover:bg-teal-200 dark:hover:bg-teal-900/50 transition-colors flex items-center gap-1.5"
+                              >
+                                <Play className="w-3.5 h-3.5" />
+                                {t("Continue")}
+                              </button>
+                            )}
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+        {/* Question Batches Section */}
+        {questionBatches.length > 0 &&
+          (filterType === "all" || filterType === "question") && (
+            <div className="bg-white dark:bg-white/[0.05] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.08] flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-500" />
+                <h2 className="font-semibold text-slate-900 dark:text-slate-100">
+                  {t("Question Batches")}
+                </h2>
+                <span className="text-xs text-slate-400 ml-auto">
+                  {questionBatches.length}{" "}
+                  {t(questionBatches.length === 1 ? "batch" : "batches")}
+                </span>
+              </div>
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {questionBatches
+                  .filter((batch) => {
+                    if (!searchQuery.trim()) return true;
+                    return batch.topic
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase());
+                  })
+                  .map((batch) => (
+                    <div
+                      key={batch.batch_id}
+                      className="px-5 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/question?batch=${batch.batch_id}`)}
+                    >
+                      <div className="flex gap-4">
+                        <div className="mt-0.5">
+                          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
+                                {t("Quiz")}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                {batch.difficulty}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400">
+                                {batch.question_type}
+                              </span>
+                            </div>
+                            <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {batch.timestamp}
+                            </span>
+                          </div>
+                          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 truncate pr-4">
+                            {batch.topic}
+                          </h3>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-xs text-slate-400 dark:text-slate-500">
+                              {batch.completed}/{batch.requested} {t("questions")}
+                            </span>
+                            {batch.failed > 0 && (
+                              <span className="text-xs text-red-400">
+                                {batch.failed} failed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="self-center">
+                          <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </div>
                     </div>

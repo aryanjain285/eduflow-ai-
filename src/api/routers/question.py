@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import json
 from datetime import datetime
 from pathlib import Path
 import re
@@ -35,7 +36,72 @@ router = APIRouter()
 
 # Output directory for mimic mode - use data/user/question
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-MIMIC_OUTPUT_DIR = PROJECT_ROOT / "data" / "user" / "question" / "mimic_papers"
+QUESTION_DIR = PROJECT_ROOT / "data" / "user" / "question"
+MIMIC_OUTPUT_DIR = QUESTION_DIR / "mimic_papers"
+
+
+@router.get("/batches")
+async def list_question_batches():
+    """List all past question generation batches with metadata."""
+    batches = []
+    if not QUESTION_DIR.exists():
+        return batches
+
+    for d in sorted(QUESTION_DIR.iterdir(), reverse=True):
+        if not d.is_dir() or d.name == "mimic_papers":
+            continue
+        summary_file = d / "summary.json"
+        plan_file = d / "plan.json"
+        if not summary_file.exists():
+            continue
+        try:
+            with open(summary_file, encoding="utf-8") as f:
+                summary = json.load(f)
+            plan = {}
+            if plan_file.exists():
+                with open(plan_file, encoding="utf-8") as f:
+                    plan = json.load(f)
+
+            # Parse timestamp from directory name (batch_YYYYMMDD_HHMMSS)
+            ts_str = d.name.replace("batch_", "").split("_")[0:2]
+            timestamp = None
+            if len(ts_str) == 2:
+                try:
+                    timestamp = datetime.strptime("_".join(ts_str), "%Y%m%d_%H%M%S").isoformat()
+                except ValueError:
+                    pass
+
+            batches.append({
+                "batch_id": d.name,
+                "timestamp": timestamp,
+                "topic": plan.get("knowledge_point", "Unknown"),
+                "difficulty": plan.get("difficulty", "medium"),
+                "question_type": plan.get("question_type", "choice"),
+                "requested": summary.get("requested", 0),
+                "completed": summary.get("completed", 0),
+                "failed": summary.get("failed", 0),
+            })
+        except Exception:
+            continue
+
+    return batches
+
+
+@router.get("/batches/{batch_id}")
+async def get_question_batch(batch_id: str):
+    """Get full question data for a specific batch."""
+    batch_dir = QUESTION_DIR / batch_id
+    if not batch_dir.exists():
+        return {"error": "Batch not found"}
+
+    summary_file = batch_dir / "summary.json"
+    if not summary_file.exists():
+        return {"error": "No summary found"}
+
+    with open(summary_file, encoding="utf-8") as f:
+        summary = json.load(f)
+
+    return summary
 
 
 @router.websocket("/mimic")

@@ -18,6 +18,9 @@ import {
   ChevronUp,
   AlertCircle,
   Lightbulb,
+  Clock,
+  ChevronRight,
+  Play,
 } from "lucide-react";
 import { useGlobal } from "@/context/GlobalContext";
 import ReactMarkdown from "react-markdown";
@@ -54,6 +57,11 @@ export default function QuestionPage() {
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [confidenceRatings, setConfidenceRatings] = useState<Record<number, number>>({});
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [pastBatches, setPastBatches] = useState<Array<{
+    batch_id: string; timestamp: string | null; topic: string;
+    difficulty: string; question_type: string; requested: number; completed: number; failed: number;
+  }>>([]);
+  const [loadingBatch, setLoadingBatch] = useState<string | null>(null);
 
   // Derived state
   const isGenerating = questionState.step === "generating";
@@ -92,6 +100,12 @@ export default function QuestionPage() {
           console.error("Failed to fetch KBs:", err);
         }
       });
+
+    // Fetch past batches
+    fetch(apiUrl("/api/v1/question/batches"), { signal: controller.signal })
+      .then((res) => res.json())
+      .then((data) => { if (isMounted && Array.isArray(data)) setPastBatches(data); })
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -190,6 +204,39 @@ export default function QuestionPage() {
     setSubmittedMap({});
     setConfidenceRatings({});
     setActiveIdx(0);
+  };
+
+  const handleLoadBatch = async (batchId: string) => {
+    setLoadingBatch(batchId);
+    try {
+      const res = await fetch(apiUrl(`/api/v1/question/batches/${batchId}`));
+      const data = await res.json();
+      if (data.error) return;
+      // Load the batch results into the question state
+      const results = (data.results || []).map((r: any) => ({
+        question: r.question,
+        analysis: r.analysis,
+        validation: r.validation,
+        extended: false,
+      }));
+      if (results.length > 0) {
+        setQuestionState((prev: any) => ({
+          ...prev,
+          step: "result",
+          results,
+          count: results.length,
+          topic: data.plan?.knowledge_point || prev.topic,
+        }));
+        setUserAnswers({});
+        setSubmittedMap({});
+        setConfidenceRatings({});
+        setActiveIdx(0);
+      }
+    } catch (err) {
+      console.error("Failed to load batch:", err);
+    } finally {
+      setLoadingBatch(null);
+    }
   };
 
   const canStart =
@@ -318,200 +365,59 @@ export default function QuestionPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-white/[0.03]">
+        <div className="flex-1 overflow-y-auto">
           {/* Config Mode */}
           {isConfigMode && (
-            <div className="p-6">
-              <div className="max-w-2xl mx-auto space-y-6">
-                {/* Mode Info Banner */}
-                <div
-                  className={`p-4 rounded-xl border ${
-                    questionState.mode === "knowledge"
-                      ? "bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800"
-                      : "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {questionState.mode === "knowledge" ? (
-                      <BrainCircuit className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                    ) : (
-                      <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    )}
-                    <div>
-                      <h3
-                        className={`font-semibold ${
-                          questionState.mode === "knowledge"
-                            ? "text-purple-800 dark:text-purple-300"
-                            : "text-blue-800 dark:text-blue-300"
-                        }`}
-                      >
-                        {questionState.mode === "knowledge"
-                          ? t("Custom Mode")
-                          : t("Mimic Exam Paper Mode")}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {questionState.mode === "knowledge"
-                          ? t(
-                              "Generate questions based on knowledge base content",
-                            )
-                          : t(
-                              "Generate similar questions based on an exam paper",
-                            )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <div className="p-8">
+              <div className="max-w-xl mx-auto space-y-8">
 
-                {/* Knowledge Base Mode Config */}
+                {/* Topic Input — hero-style */}
                 {questionState.mode === "knowledge" && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        {t("Knowledge Point / Topic")}
-                      </label>
-                      <input
-                        type="text"
-                        value={questionState.topic}
-                        onChange={(e) =>
-                          setQuestionState((prev) => ({
-                            ...prev,
-                            topic: e.target.value,
-                          }))
-                        }
-                        placeholder={t("e.g. Gradient Descent Optimization")}
-                        className="w-full p-4 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 transition-all text-lg dark:text-slate-200 placeholder:text-slate-400"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {t("Count")}
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="50"
-                          value={questionState.count || ""}
-                          onChange={(e) => {
-                            const rawVal = e.target.value;
-                            // Allow empty input while typing
-                            if (rawVal === "") {
-                              setQuestionState((prev) => ({
-                                ...prev,
-                                count: 0,
-                              }));
-                              return;
-                            }
-                            const val = parseInt(rawVal);
-                            if (!isNaN(val)) {
-                              setQuestionState((prev) => ({
-                                ...prev,
-                                count: Math.min(50, Math.max(0, val)),
-                              }));
-                            }
-                          }}
-                          onBlur={(e) => {
-                            // Ensure valid value on blur
-                            const val = parseInt(e.target.value) || 1;
-                            setQuestionState((prev) => ({
-                              ...prev,
-                              count: Math.max(1, Math.min(50, val)),
-                            }));
-                          }}
-                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl text-center outline-none focus:border-purple-500 dark:text-slate-200"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {t("Difficulty")}
-                        </label>
-                        <select
-                          value={questionState.difficulty}
-                          onChange={(e) =>
-                            setQuestionState((prev) => ({
-                              ...prev,
-                              difficulty: e.target.value,
-                            }))
-                          }
-                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
-                        >
-                          <option value="easy">{t("Easy")}</option>
-                          <option value="medium">{t("Medium")}</option>
-                          <option value="hard">{t("Hard")}</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {t("Type")}
-                        </label>
-                        <select
-                          value={questionState.type}
-                          onChange={(e) =>
-                            setQuestionState((prev) => ({
-                              ...prev,
-                              type: e.target.value,
-                            }))
-                          }
-                          className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200"
-                        >
-                          <option value="choice">{t("Multiple Choice")}</option>
-                          <option value="written">{t("Written")}</option>
-                        </select>
-                      </div>
-                    </div>
-                  </>
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-2 block">
+                      {t("What do you want to be quizzed on?")}
+                    </label>
+                    <input
+                      type="text"
+                      value={questionState.topic}
+                      onChange={(e) =>
+                        setQuestionState((prev) => ({
+                          ...prev,
+                          topic: e.target.value,
+                        }))
+                      }
+                      placeholder={t("e.g. Gradient Descent Optimization")}
+                      className="w-full px-5 py-4 bg-transparent border-b-2 border-white/[0.1] focus:border-purple-500 outline-none text-xl font-medium text-white placeholder:text-slate-600 transition-colors"
+                      autoFocus
+                    />
+                  </div>
                 )}
 
-                {/* Mimic Mode Config */}
+                {/* Mimic Mode — PDF Upload */}
                 {questionState.mode === "mimic" && (
                   <div className="space-y-5">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        {t("Upload Exam Paper (PDF)")}
+                    <div>
+                      <label className="text-sm font-medium text-slate-300 mb-3 block">
+                        {t("Upload an exam paper to generate similar questions")}
                       </label>
                       <div className="relative">
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          id="pdf-upload"
-                        />
-                        <label
-                          htmlFor="pdf-upload"
-                          className="flex items-center justify-center gap-3 w-full py-8 border-2 border-dashed border-slate-300 dark:border-white/[0.08] rounded-xl cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-all"
+                        <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" id="pdf-upload" />
+                        <label htmlFor="pdf-upload"
+                          className="flex items-center justify-center gap-3 w-full py-10 border border-dashed border-white/[0.1] rounded-2xl cursor-pointer hover:border-purple-500/40 hover:bg-purple-500/[0.03] transition-all"
                         >
                           {questionState.uploadedFile ? (
-                            <div className="flex items-center gap-3 text-purple-700 dark:text-purple-400">
-                              <FileText className="w-8 h-8" />
+                            <div className="flex items-center gap-3 text-purple-400">
+                              <FileText className="w-6 h-6" />
                               <div>
-                                <p className="font-medium">
-                                  {questionState.uploadedFile.name}
-                                </p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                  {(
-                                    questionState.uploadedFile.size /
-                                    1024 /
-                                    1024
-                                  ).toFixed(2)}{" "}
-                                  MB
-                                </p>
+                                <p className="font-medium text-white">{questionState.uploadedFile.name}</p>
+                                <p className="text-xs text-slate-500">{(questionState.uploadedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                               </div>
                             </div>
                           ) : (
-                            <div className="text-center text-slate-500 dark:text-slate-400">
-                              <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                              <p className="font-medium">
-                                {t("Click to upload PDF")}
-                              </p>
-                              <p className="text-xs">
-                                {t(
-                                  "The system will parse and generate questions",
-                                )}
-                              </p>
+                            <div className="text-center">
+                              <Upload className="w-6 h-6 mx-auto mb-2 text-slate-500" />
+                              <p className="text-sm font-medium text-slate-400">{t("Click to upload PDF")}</p>
+                              <p className="text-xs text-slate-600 mt-1">{t("The system will parse and generate questions")}</p>
                             </div>
                           )}
                         </label>
@@ -519,30 +425,74 @@ export default function QuestionPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/[0.05]"></div>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
-                        {t("OR")}
-                      </span>
-                      <div className="flex-1 h-px bg-slate-200 dark:bg-white/[0.05]"></div>
+                      <div className="flex-1 h-px bg-white/[0.06]"></div>
+                      <span className="text-xs text-slate-600">{t("OR")}</span>
+                      <div className="flex-1 h-px bg-white/[0.06]"></div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        {t("Pre-parsed Directory")}
-                      </label>
+                    <input
+                      type="text"
+                      value={questionState.paperPath}
+                      onChange={(e) =>
+                        setQuestionState((prev) => ({ ...prev, paperPath: e.target.value, uploadedFile: null }))
+                      }
+                      placeholder={t("Pre-parsed directory path (e.g. 2211asm1)")}
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl outline-none focus:border-purple-500 text-sm text-slate-200 placeholder:text-slate-600 transition-colors"
+                    />
+                  </div>
+                )}
+
+                {/* Options Row — inline pills */}
+                {questionState.mode === "knowledge" && (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {/* Count */}
+                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                      <span className="text-xs text-slate-500">{t("Count")}</span>
                       <input
-                        type="text"
-                        value={questionState.paperPath}
-                        onChange={(e) =>
-                          setQuestionState((prev) => ({
-                            ...prev,
-                            paperPath: e.target.value,
-                            uploadedFile: null,
-                          }))
-                        }
-                        placeholder={t("e.g. 2211asm1")}
-                        className="w-full p-3 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-xl outline-none focus:border-purple-500 dark:text-slate-200 placeholder:text-slate-400"
+                        type="number" min="1" max="50"
+                        value={questionState.count || ""}
+                        onChange={(e) => {
+                          const rawVal = e.target.value;
+                          if (rawVal === "") { setQuestionState((prev) => ({ ...prev, count: 0 })); return; }
+                          const val = parseInt(rawVal);
+                          if (!isNaN(val)) setQuestionState((prev) => ({ ...prev, count: Math.min(50, Math.max(0, val)) }));
+                        }}
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value) || 1;
+                          setQuestionState((prev) => ({ ...prev, count: Math.max(1, Math.min(50, val)) }));
+                        }}
+                        className="w-10 bg-transparent text-center text-sm font-semibold text-white outline-none"
                       />
+                    </div>
+
+                    {/* Difficulty */}
+                    <div className="flex rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden">
+                      {(["easy", "medium", "hard"] as const).map((d) => (
+                        <button key={d} onClick={() => setQuestionState((prev) => ({ ...prev, difficulty: d }))}
+                          className={`px-4 py-2.5 text-xs font-medium capitalize transition-all ${
+                            questionState.difficulty === d
+                              ? "bg-purple-500/20 text-purple-300"
+                              : "text-slate-500 hover:text-slate-300"
+                          }`}
+                        >
+                          {t(d.charAt(0).toUpperCase() + d.slice(1))}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Type */}
+                    <div className="flex rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden">
+                      {([{ val: "choice", label: "MCQ" }, { val: "written", label: "Written" }] as const).map(({ val, label }) => (
+                        <button key={val} onClick={() => setQuestionState((prev) => ({ ...prev, type: val }))}
+                          className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                            questionState.type === val
+                              ? "bg-purple-500/20 text-purple-300"
+                              : "text-slate-500 hover:text-slate-300"
+                          }`}
+                        >
+                          {t(label)}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -551,11 +501,55 @@ export default function QuestionPage() {
                 <button
                   onClick={handleStart}
                   disabled={!canStart || isGenerating}
-                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg shadow-purple-500/30 hover:from-purple-700 hover:to-indigo-700 hover:shadow-purple-500/50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl font-semibold text-base shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
                   {t("Generate Questions")}
                 </button>
+
+                {/* Previous Quizzes */}
+                {pastBatches.length > 0 && (
+                  <div className="pt-4 border-t border-slate-200 dark:border-white/[0.06]">
+                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {t("Previous Quizzes")}
+                    </h3>
+                    <div className="space-y-2">
+                      {pastBatches.map((batch) => {
+                        const date = batch.timestamp
+                          ? new Date(batch.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                          : "Unknown date";
+                        const diffColor = batch.difficulty === "hard" ? "text-red-400 bg-red-500/10" : batch.difficulty === "medium" ? "text-amber-400 bg-amber-500/10" : "text-emerald-400 bg-emerald-500/10";
+                        const isLoading = loadingBatch === batch.batch_id;
+                        return (
+                          <button
+                            key={batch.batch_id}
+                            onClick={() => handleLoadBatch(batch.batch_id)}
+                            disabled={isLoading}
+                            className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] hover:border-purple-400/40 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-all group disabled:opacity-50"
+                          >
+                            <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+                              {isLoading ? (
+                                <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                              ) : (
+                                <FileText className="w-4 h-4 text-purple-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{batch.topic}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] text-slate-400">{date}</span>
+                                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${diffColor}`}>{batch.difficulty}</span>
+                                <span className="text-[10px] text-slate-500">{batch.completed}/{batch.requested} questions</span>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-purple-400 transition flex-shrink-0" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

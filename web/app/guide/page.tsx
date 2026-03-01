@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   GraduationCap,
   ChevronRight,
   ChevronLeft,
   ArrowRight,
   Loader2,
+  BookOpen,
+  Clock,
+  CheckCircle2,
+  Circle,
+  Play,
+  RotateCcw,
 } from "lucide-react";
 import "katex/dist/katex.min.css";
 
@@ -20,6 +26,18 @@ import {
 } from "./components";
 import { useGuideSession, useNotebookSelection } from "./hooks";
 import { useTranslation } from "react-i18next";
+import { apiUrl } from "@/lib/api";
+
+interface PastSession {
+  session_id: string;
+  notebook_name: string;
+  status: string;
+  created_at: number;
+  current_index: number;
+  total_points: number;
+  knowledge_points: string[];
+  has_summary: boolean;
+}
 
 export default function GuidePage() {
   const { t } = useTranslation();
@@ -54,17 +72,41 @@ export default function GuidePage() {
     nextKnowledge,
     sendMessage,
     fixHtml,
+    loadSession,
+    resetSession,
   } = useGuideSession();
 
   // UI state
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarWide, setSidebarWide] = useState(false);
+  const [pastSessions, setPastSessions] = useState<PastSession[]>([]);
+  const [loadingPast, setLoadingPast] = useState(false);
 
   // Load notebooks on mount
   useEffect(() => {
     fetchNotebooks();
   }, [fetchNotebooks]);
+
+  // Fetch past sessions when idle
+  const fetchPastSessions = useCallback(async () => {
+    setLoadingPast(true);
+    try {
+      const res = await fetch(apiUrl("/api/v1/guide/sessions"));
+      const data = await res.json();
+      setPastSessions(data);
+    } catch {
+      setPastSessions([]);
+    } finally {
+      setLoadingPast(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (sessionState.status === "idle") {
+      fetchPastSessions();
+    }
+  }, [sessionState.status, fetchPastSessions]);
 
   // Calculate widths based on ratio
   const leftWidthPercent = sidebarCollapsed ? 0 : sidebarWide ? 75 : 25;
@@ -110,6 +152,17 @@ export default function GuidePage() {
           />
         )}
 
+        {/* New Session button when in a loaded session */}
+        {sessionState.status !== "idle" && (
+          <button
+            onClick={resetSession}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors px-2 py-1 -mb-2"
+          >
+            <RotateCcw className="w-3 h-3" />
+            {t("New Session")}
+          </button>
+        )}
+
         {/* Progress Bar with Action Buttons */}
         {sessionState.status !== "idle" && (
           <ProgressPanel
@@ -134,14 +187,14 @@ export default function GuidePage() {
 
       {/* RIGHT PANEL: Interactive Content */}
       <div
-        className="flex flex-col h-full overflow-hidden transition-all duration-300 flex-1 relative"
+        className="flex flex-col h-full overflow-hidden transition-all duration-300 flex-1"
         style={{ width: `${rightWidthPercent}%` }}
       >
-        {/* Collapse/Expand and Width Toggle Button */}
-        <div className="absolute top-4 left-4 z-20 flex gap-2">
+        {/* Collapse/Expand toolbar — in flow, not overlapping */}
+        <div className="flex gap-2 mb-2 shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
+            className="p-1.5 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
             title={
               sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")
             }
@@ -155,7 +208,7 @@ export default function GuidePage() {
           {!sidebarCollapsed && (
             <button
               onClick={() => setSidebarWide(!sidebarWide)}
-              className="p-2 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
+              className="p-1.5 bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/[0.10] rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-white/[0.08] transition-all"
               title={
                 sidebarWide
                   ? t("Switch to narrow sidebar (1:3)")
@@ -171,16 +224,158 @@ export default function GuidePage() {
 
         {/* Content based on state */}
         {sessionState.status === "idle" ? (
-          <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 p-8">
-            <GraduationCap className="w-24 h-24 text-slate-200 dark:text-slate-600 mb-6" />
-            <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">
-              {t("Guided Learning")}
-            </h3>
-            <p className="text-sm text-slate-400 dark:text-slate-500 max-w-md text-center leading-relaxed">
-              {t(
-                "Select a notebook, and the system will generate a personalized learning plan. Through interactive pages and intelligent Q&A, you'll gradually master all the content.",
+          <div className="flex-1 bg-white dark:bg-[#12122a] rounded-2xl shadow-sm border border-slate-200 dark:border-white/[0.08] flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="px-8 pt-8 pb-4">
+              <div className="flex items-center gap-3 mb-1">
+                <GraduationCap className="w-6 h-6 text-violet-500" />
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                  {t("Guided Learning")}
+                </h3>
+              </div>
+              <p className="text-sm text-slate-400 dark:text-slate-500 ml-9">
+                {t("Select a notebook to start, or resume a previous session.")}
+              </p>
+            </div>
+
+            {/* Past Sessions */}
+            <div className="flex-1 overflow-y-auto px-8 pb-8">
+              {loadingPast ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                </div>
+              ) : pastSessions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center mb-4">
+                    <BookOpen className="w-8 h-8 text-violet-300 dark:text-violet-500/50" />
+                  </div>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm">
+                    {t("No previous sessions yet.")}
+                  </p>
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
+                    {t("Select a notebook on the left to begin learning.")}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
+                    {t("Previous Sessions")}
+                  </h4>
+                  {pastSessions.map((session) => {
+                    const isComplete =
+                      session.status === "completed" || session.has_summary;
+                    const progress =
+                      session.total_points > 0
+                        ? Math.round(
+                            (session.current_index / session.total_points) *
+                              100,
+                          )
+                        : 0;
+
+                    return (
+                      <div
+                        key={session.session_id}
+                        className="group bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.06] rounded-xl p-4 hover:border-violet-300 dark:hover:border-violet-500/30 transition-all cursor-pointer"
+                        onClick={() => loadSession(session.session_id)}
+                      >
+                        {/* Top row: name + status + date */}
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h5 className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                              {session.notebook_name}
+                            </h5>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  isComplete
+                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                                    : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                                }`}
+                              >
+                                {isComplete
+                                  ? t("Completed")
+                                  : t("In Progress")}
+                              </span>
+                              <span className="text-xs text-slate-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(
+                                  session.created_at * 1000,
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              loadSession(session.session_id);
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium bg-violet-100 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 rounded-lg hover:bg-violet-200 dark:hover:bg-violet-500/25 transition-colors flex items-center gap-1.5 opacity-0 group-hover:opacity-100"
+                          >
+                            <Play className="w-3 h-3" />
+                            {isComplete ? t("Review") : t("Resume")}
+                          </button>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex-1 h-1.5 bg-slate-200 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                isComplete
+                                  ? "bg-emerald-500"
+                                  : "bg-violet-500"
+                              }`}
+                              style={{
+                                width: `${isComplete ? 100 : progress}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs text-slate-400 font-medium tabular-nums">
+                            {session.current_index}/{session.total_points}
+                          </span>
+                        </div>
+
+                        {/* Knowledge point checklist */}
+                        <div className="space-y-1">
+                          {session.knowledge_points.map((kp, i) => {
+                            const isDone = i < session.current_index;
+                            const isCurrent = i === session.current_index;
+
+                            return (
+                              <div
+                                key={i}
+                                className="flex items-center gap-2"
+                              >
+                                {isDone ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                                ) : isCurrent && !isComplete ? (
+                                  <div className="w-3.5 h-3.5 rounded-full border-2 border-violet-500 flex-shrink-0 flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                                  </div>
+                                ) : (
+                                  <Circle className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
+                                )}
+                                <span
+                                  className={`text-xs truncate ${
+                                    isDone || (isComplete && true)
+                                      ? "text-slate-500 dark:text-slate-400"
+                                      : isCurrent
+                                        ? "text-violet-600 dark:text-violet-400 font-medium"
+                                        : "text-slate-400 dark:text-slate-500"
+                                  }`}
+                                >
+                                  {kp}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </p>
+            </div>
           </div>
         ) : isCompleted ? (
           <CompletionSummary summary={sessionState.summary} />

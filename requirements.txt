@@ -1,5 +1,5 @@
 # ============================================
-# DeepTutor Python Dependencies
+# EduFlow AI Python Dependencies
 # ============================================
 # Python >= 3.10 required
 # Install: pip install -r requirements.txt

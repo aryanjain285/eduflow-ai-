@@ -453,6 +453,70 @@ export function useGuideSession() {
     ],
   );
 
+  const loadSession = useCallback(
+    async (sessionId: string) => {
+      setIsLoading(true);
+      setLoadingMessage("Loading session...");
+
+      try {
+        const res = await fetch(
+          apiUrl(`/api/v1/guide/session/${sessionId}`),
+        );
+        const data = await res.json();
+
+        setIsLoading(false);
+        setLoadingMessage("");
+
+        if (data && data.session_id) {
+          const status = data.status || "initialized";
+          const kps = (data.knowledge_points || []).map((kp: any) => ({
+            knowledge_title: kp.knowledge_title || "",
+            knowledge_summary: kp.knowledge_summary || "",
+            user_difficulty: kp.user_difficulty || "",
+          }));
+
+          setSessionState({
+            session_id: data.session_id,
+            notebook_id: data.notebook_id || "cross_notebook",
+            notebook_name: data.notebook_name || "Unknown",
+            knowledge_points: kps,
+            current_index: data.current_index ?? -1,
+            current_html: data.current_html || "",
+            status: status,
+            progress:
+              kps.length > 0
+                ? Math.round(
+                    (Math.max(0, data.current_index ?? 0) / kps.length) * 100,
+                  )
+                : 0,
+            summary: data.summary || "",
+          });
+
+          setChatMessages([
+            {
+              id: "restored",
+              role: "system",
+              content: `📚 Resumed session with **${kps.length}** knowledge points. Progress: ${Math.max(0, (data.current_index ?? 0) + 1)}/${kps.length}`,
+              timestamp: Date.now(),
+            },
+          ]);
+        }
+      } catch (err) {
+        setIsLoading(false);
+        setLoadingMessage("");
+        console.error("Failed to load session:", err);
+      }
+    },
+    [addLoadingMessage],
+  );
+
+  const resetSession = useCallback(() => {
+    setSessionState(INITIAL_SESSION_STATE);
+    setChatMessages([]);
+    saveToStorage(STORAGE_KEYS.GUIDE_SESSION, {});
+    saveToStorage(GUIDE_CHAT_KEY, []);
+  }, []);
+
   // Computed states
   const canStart =
     sessionState.status === "initialized" &&
@@ -479,5 +543,7 @@ export function useGuideSession() {
     nextKnowledge,
     sendMessage,
     fixHtml,
+    loadSession,
+    resetSession,
   };
 }
