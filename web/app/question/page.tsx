@@ -141,6 +141,34 @@ export default function QuestionPage() {
 
   const handleSubmit = () => {
     setSubmittedMap((prev) => ({ ...prev, [activeIdx]: true }));
+
+    // Record assessment outcome to backend (fire-and-forget)
+    if (currentQuestion) {
+      const q = currentQuestion.question;
+      const isChoice =
+        q.question_type === "choice" || q.type === "choice";
+      const isCorrect = isChoice
+        ? userAnswers[activeIdx] === q.correct_answer
+        : false; // Written answers: backend can evaluate later
+      const topic =
+        q.knowledge_point || questionState.selectedKb || questionState.topic || "Unknown";
+
+      fetch(apiUrl("/api/v1/learning-state/record-assessment"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          knowledge_base_id: questionState.selectedKb || "",
+          question_text: q.question || "",
+          user_answer: userAnswers[activeIdx] || "",
+          correct_answer: q.correct_answer || "",
+          is_correct: isCorrect,
+          confidence: confidenceRatings[activeIdx] || 3,
+          difficulty: q.difficulty || "medium",
+          question_type: q.question_type || q.type || "choice",
+          topic,
+        }),
+      }).catch(() => {}); // Fire-and-forget, don't block UI
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

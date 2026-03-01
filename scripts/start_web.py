@@ -252,8 +252,23 @@ def start_frontend():
     frontend_port = get_frontend_port()
     print_flush(f"✅ Frontend port: {frontend_port}")
 
-    # Check if npm is available
+    # Check if npm is available (with nvm fallback)
     npm_path = shutil.which("npm")
+    if not npm_path:
+        # Try to find npm via nvm installation directory
+        nvm_dir = os.environ.get("NVM_DIR", os.path.join(os.path.expanduser("~"), ".nvm"))
+        nvm_versions = os.path.join(nvm_dir, "versions", "node")
+        if os.path.isdir(nvm_versions):
+            # Pick the latest installed node version
+            versions = sorted(os.listdir(nvm_versions))
+            if versions:
+                candidate = os.path.join(nvm_versions, versions[-1], "bin", "npm")
+                if os.path.isfile(candidate):
+                    npm_path = candidate
+                    # Also add node bin dir to PATH so child processes can find node
+                    node_bin = os.path.dirname(candidate)
+                    os.environ["PATH"] = node_bin + os.pathsep + os.environ.get("PATH", "")
+                    print_flush(f"✅ Found npm via nvm: {npm_path}")
     if not npm_path:
         print_flush("❌ Error: 'npm' command not found!")
         print_flush("   Please install Node.js and npm first.")
@@ -268,9 +283,8 @@ def start_frontend():
         print_flush("📦 Installing frontend dependencies...")
         print_flush("   This may take a few minutes, please wait...")
         try:
-            npm_cmd = shutil.which("npm") or "npm"
             process = subprocess.Popen(
-                [npm_cmd, "install"],
+                [npm_path, "install"],
                 cwd=web_dir,
                 shell=False,
                 stdout=subprocess.PIPE,

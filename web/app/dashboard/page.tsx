@@ -1,841 +1,456 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
   TrendingUp,
   TrendingDown,
   Target,
-  Clock,
   Zap,
   BookOpen,
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  BarChart3,
   RefreshCw,
   Calendar,
-  ChevronRight,
   Timer,
-  Lightbulb,
   GraduationCap,
-  Calculator,
   PenTool,
-  Microscope,
-  MessageCircle,
+  Calculator,
+  Award,
+  Eye,
+  Clock,
+  ChevronRight,
+  ChevronDown,
+  Minus,
+  Play,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 import { apiUrl } from "@/lib/api";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 
-// Types
+// ── Types ─────────────────────────────────────────────────────────────
+interface MasteryBreakdown { bkt_score: number; exposure_credit: number; retention_mod: number; calibration_mod: number; }
+interface AssessmentStats { total: number; correct: number; accuracy: number; avg_confidence: number; }
+interface Velocity { direction: "improving" | "stable" | "declining"; delta: number; sessions_to_mastery: number | null; }
+interface Calibration { score: number; avg_confidence: number; accuracy: number; is_overconfident: boolean; is_underconfident: boolean; }
 interface TopicDetail {
-  topic: string;
-  mastery: number;
-  level: string;
-  attempts: number;
-  successes: number;
-  last_interaction: number;
-  days_since_last: number;
-  interaction_types: Record<string, number>;
+  topic: string; mastery: number; level: string; attempts: number; successes: number;
+  last_interaction: number; days_since_last: number; interaction_types: Record<string, number>;
+  mastery_breakdown?: MasteryBreakdown; assessment_stats?: AssessmentStats;
+  velocity?: Velocity; calibration?: Calibration; explanation?: string;
 }
-
-interface Insight {
-  type: string;
-  severity: string;
-  title: string;
-  description: string;
-  topic?: string;
-  score?: number;
-  days_inactive?: number;
-  action: string;
-  action_link: string;
-}
-
-interface StudyPlanItem {
-  topic: string;
-  mastery: number;
-  level: string;
-  minutes: number;
-  activity: string;
-  activity_label: string;
-  reason: string;
-  link: string;
-}
-
+interface Insight { type: string; severity: string; title: string; description: string; topic?: string; score?: number; days_inactive?: number; action: string; action_link: string; }
+interface StudyPlanItem { topic: string; mastery: number; level: string; minutes: number; activity: string; activity_label: string; reason: string; link: string; }
 interface LearningState {
-  overview: {
-    total_topics: number;
-    total_interactions: number;
-    average_mastery: number;
-    solver_sessions: number;
-    chat_sessions: number;
-    topics_mastered: number;
-    topics_needs_attention: number;
-  };
-  topics: TopicDetail[];
-  mastery_scores: Record<string, number>;
-  insights: Insight[];
-  timeline: Array<{
-    date: string;
-    mastery: number;
-    topics_studied: number;
-    total_interactions: number;
-  }>;
+  overview: { total_topics: number; total_interactions: number; average_mastery: number; solver_sessions: number; chat_sessions: number; topics_mastered: number; topics_needs_attention: number; };
+  topics: TopicDetail[]; mastery_scores: Record<string, number>; insights: Insight[];
+  timeline: Array<{ date: string; mastery: number; topics_studied: number; total_interactions: number; }>;
   activity_breakdown: Record<string, number>;
 }
+interface StudyPlan { study_hours: number; plan: StudyPlanItem[]; total_planned_minutes: number; }
 
-interface StudyPlan {
-  study_hours: number;
-  plan: StudyPlanItem[];
-  total_planned_minutes: number;
-}
-
-// Demo data for when no real data exists
+// ── Demo ──────────────────────────────────────────────────────────────
 const DEMO_STATE: LearningState = {
-  overview: {
-    total_topics: 8,
-    total_interactions: 47,
-    average_mastery: 58.4,
-    solver_sessions: 12,
-    chat_sessions: 8,
-    topics_mastered: 2,
-    topics_needs_attention: 3,
-  },
+  overview: { total_topics: 6, total_interactions: 42, average_mastery: 44, solver_sessions: 12, chat_sessions: 8, topics_mastered: 1, topics_needs_attention: 2 },
   topics: [
-    { topic: "Integration by Parts", mastery: 32, level: "beginner", attempts: 8, successes: 3, last_interaction: Date.now()/1000 - 86400, days_since_last: 1, interaction_types: { question: 5, solve: 3 } },
-    { topic: "Chain Rule", mastery: 45, level: "developing", attempts: 6, successes: 3, last_interaction: Date.now()/1000 - 172800, days_since_last: 2, interaction_types: { question: 3, solve: 2, chat: 1 } },
-    { topic: "Linear Algebra", mastery: 88, level: "mastered", attempts: 12, successes: 10, last_interaction: Date.now()/1000 - 43200, days_since_last: 0.5, interaction_types: { question: 5, solve: 4, research: 3 } },
-    { topic: "Probability Theory", mastery: 72, level: "proficient", attempts: 9, successes: 7, last_interaction: Date.now()/1000 - 259200, days_since_last: 3, interaction_types: { question: 4, solve: 3, chat: 2 } },
-    { topic: "Differential Equations", mastery: 28, level: "beginner", attempts: 5, successes: 1, last_interaction: Date.now()/1000 - 604800, days_since_last: 7, interaction_types: { question: 3, solve: 2 } },
-    { topic: "Taylor Series", mastery: 55, level: "developing", attempts: 7, successes: 4, last_interaction: Date.now()/1000 - 86400*4, days_since_last: 4, interaction_types: { question: 4, solve: 2, chat: 1 } },
-    { topic: "Matrices & Determinants", mastery: 82, level: "mastered", attempts: 10, successes: 9, last_interaction: Date.now()/1000 - 86400*2, days_since_last: 2, interaction_types: { question: 4, solve: 3, research: 2, chat: 1 } },
-    { topic: "Fourier Transform", mastery: 18, level: "needs_attention", attempts: 3, successes: 0, last_interaction: Date.now()/1000 - 86400*10, days_since_last: 10, interaction_types: { question: 2, chat: 1 } },
+    { topic: "Linear Algebra", mastery: 82, level: "mastered", attempts: 20, successes: 16, last_interaction: Date.now()/1000 - 43200, days_since_last: 0.5, interaction_types: { question: 5, solve: 4, assessment: 8 }, mastery_breakdown: { bkt_score: 45, exposure_credit: 20, retention_mod: 15, calibration_mod: 2 }, assessment_stats: { total: 8, correct: 7, accuracy: 0.875, avg_confidence: 4.0 }, velocity: { direction: "stable", delta: 0.02, sessions_to_mastery: null }, calibration: { score: 2, avg_confidence: 4.0, accuracy: 0.875, is_overconfident: false, is_underconfident: false }, explanation: "7/8 correct, strong retention" },
+    { topic: "Probability Theory", mastery: 55, level: "developing", attempts: 15, successes: 10, last_interaction: Date.now()/1000 - 259200, days_since_last: 3, interaction_types: { question: 4, solve: 3, assessment: 6 }, mastery_breakdown: { bkt_score: 30, exposure_credit: 20, retention_mod: 8, calibration_mod: -3 }, assessment_stats: { total: 6, correct: 4, accuracy: 0.667, avg_confidence: 3.8 }, velocity: { direction: "improving", delta: 0.15, sessions_to_mastery: 4 }, calibration: { score: -3, avg_confidence: 3.8, accuracy: 0.667, is_overconfident: false, is_underconfident: false }, explanation: "4/6 correct, improving trend" },
+    { topic: "Chain Rule", mastery: 48, level: "developing", attempts: 10, successes: 6, last_interaction: Date.now()/1000 - 172800, days_since_last: 2, interaction_types: { question: 3, solve: 2, assessment: 4 }, mastery_breakdown: { bkt_score: 28, exposure_credit: 18, retention_mod: 10, calibration_mod: -8 }, assessment_stats: { total: 4, correct: 2, accuracy: 0.5, avg_confidence: 4.2 }, velocity: { direction: "improving", delta: 0.25, sessions_to_mastery: 5 }, calibration: { score: -8, avg_confidence: 4.2, accuracy: 0.5, is_overconfident: true, is_underconfident: false }, explanation: "2/4 correct, overconfident" },
+    { topic: "Taylor Series", mastery: 38, level: "beginner", attempts: 11, successes: 6, last_interaction: Date.now()/1000 - 86400*4, days_since_last: 4, interaction_types: { question: 4, solve: 2, assessment: 4 }, mastery_breakdown: { bkt_score: 18, exposure_credit: 20, retention_mod: 5, calibration_mod: -5 }, assessment_stats: { total: 4, correct: 2, accuracy: 0.5, avg_confidence: 3.8 }, velocity: { direction: "declining", delta: -0.2, sessions_to_mastery: null }, calibration: { score: -5, avg_confidence: 3.8, accuracy: 0.5, is_overconfident: true, is_underconfident: false }, explanation: "2/4 correct, declining" },
+    { topic: "Integration by Parts", mastery: 18, level: "needs_attention", attempts: 8, successes: 3, last_interaction: Date.now()/1000 - 86400, days_since_last: 1, interaction_types: { question: 5, solve: 3 }, mastery_breakdown: { bkt_score: 0, exposure_credit: 18, retention_mod: 0, calibration_mod: 0 }, assessment_stats: { total: 0, correct: 0, accuracy: 0, avg_confidence: 0 }, velocity: { direction: "stable", delta: 0, sessions_to_mastery: null }, calibration: { score: 0, avg_confidence: 0, accuracy: 0, is_overconfident: false, is_underconfident: false }, explanation: "No assessments yet" },
+    { topic: "Fourier Transform", mastery: 9, level: "needs_attention", attempts: 3, successes: 0, last_interaction: Date.now()/1000 - 86400*10, days_since_last: 10, interaction_types: { question: 2, chat: 1 }, mastery_breakdown: { bkt_score: 0, exposure_credit: 9, retention_mod: 0, calibration_mod: 0 }, assessment_stats: { total: 0, correct: 0, accuracy: 0, avg_confidence: 0 }, velocity: { direction: "stable", delta: 0, sessions_to_mastery: null }, calibration: { score: 0, avg_confidence: 0, accuracy: 0, is_overconfident: false, is_underconfident: false }, explanation: "No assessments yet" },
   ],
-  mastery_scores: {
-    "Integration by Parts": 32,
-    "Chain Rule": 45,
-    "Linear Algebra": 88,
-    "Probability Theory": 72,
-    "Differential Equations": 28,
-    "Taylor Series": 55,
-    "Matrices & Determinants": 82,
-    "Fourier Transform": 18,
-  },
+  mastery_scores: { "Linear Algebra": 82, "Probability Theory": 55, "Chain Rule": 48, "Taylor Series": 38, "Integration by Parts": 18, "Fourier Transform": 9 },
   insights: [
-    { type: "weakness", severity: "high", title: "Focus Area: Fourier Transform", description: "You've interacted with this topic 3 times with a 0% success rate. Consider revisiting the fundamentals.", topic: "Fourier Transform", score: 18, action: "Start a guided learning session", action_link: "/guide" },
-    { type: "decay", severity: "medium", title: "Review Needed: Differential Equations", description: "It's been 7 days since you last studied this topic. Your mastery may be declining.", topic: "Differential Equations", days_inactive: 7, action: "Take a quick quiz to refresh", action_link: "/question" },
-    { type: "strength", severity: "positive", title: "Strong Area: Linear Algebra", description: "You're performing well here with 88% mastery. Keep it up!", topic: "Linear Algebra", score: 88, action: "Challenge yourself with harder problems", action_link: "/solver" },
-    { type: "consistency", severity: "medium", title: "Study More Consistently", description: "You're averaging 2.3 study interactions per day. Try to practice a little every day for better retention.", action: "Set a daily study goal", action_link: "/" },
+    { type: "overconfidence", severity: "high", title: "Overconfidence Alert", description: "Chain Rule: Your confidence is 4.2/5 but accuracy is only 50%. Consider retaking the assessment to recalibrate.", topic: "Chain Rule", action: "Retake assessment", action_link: "/question" },
+    { type: "velocity", severity: "positive", title: "Great Momentum", description: "Probability Theory accuracy is trending upward. Your recent answers show real improvement!", topic: "Probability Theory", action: "Continue practicing", action_link: "/question" },
+    { type: "weakness", severity: "high", title: "Unmeasured Topic", description: "Integration by Parts has 8 interactions but zero assessments. Take a quiz to benchmark your understanding.", topic: "Integration by Parts", action: "Take a quiz", action_link: "/question" },
+    { type: "strength", severity: "positive", title: "Mastered!", description: "Linear Algebra: 87.5% accuracy with well-calibrated confidence. You truly know this material.", topic: "Linear Algebra", score: 82, action: "Try harder problems", action_link: "/solver" },
   ],
-  timeline: [
-    { date: "2026-02-20", mastery: 35, topics_studied: 3, total_interactions: 5 },
-    { date: "2026-02-21", mastery: 40, topics_studied: 4, total_interactions: 7 },
-    { date: "2026-02-22", mastery: 38, topics_studied: 2, total_interactions: 4 },
-    { date: "2026-02-23", mastery: 45, topics_studied: 5, total_interactions: 8 },
-    { date: "2026-02-24", mastery: 50, topics_studied: 4, total_interactions: 6 },
-    { date: "2026-02-25", mastery: 48, topics_studied: 3, total_interactions: 5 },
-    { date: "2026-02-26", mastery: 55, topics_studied: 5, total_interactions: 9 },
-    { date: "2026-02-27", mastery: 58, topics_studied: 4, total_interactions: 7 },
-    { date: "2026-02-28", mastery: 62, topics_studied: 6, total_interactions: 10 },
-    { date: "2026-03-01", mastery: 58, topics_studied: 4, total_interactions: 6 },
-  ],
-  activity_breakdown: { question: 22, solve: 14, chat: 6, research: 5 },
+  timeline: [],
+  activity_breakdown: { question: 20, solve: 12, chat: 4, assessment: 22 },
 };
-
 const DEMO_PLAN: StudyPlan = {
-  study_hours: 2,
+  study_hours: 2, total_planned_minutes: 120,
   plan: [
-    { topic: "Fourier Transform", mastery: 18, level: "needs_attention", minutes: 40, activity: "guided_learning", activity_label: "Guided Learning", reason: "Your mastery is at 18%. Start with structured, step-by-step learning to build foundations.", link: "/guide" },
-    { topic: "Differential Equations", mastery: 28, level: "beginner", minutes: 35, activity: "guided_learning", activity_label: "Guided Learning", reason: "Your mastery is at 28%. Start with structured, step-by-step learning to build foundations.", link: "/guide" },
-    { topic: "Integration by Parts", mastery: 32, level: "beginner", minutes: 30, activity: "practice", activity_label: "Practice Quiz", reason: "At 32% mastery, active recall through quizzes will strengthen your understanding.", link: "/question" },
-    { topic: "Chain Rule", mastery: 45, level: "developing", minutes: 15, activity: "practice", activity_label: "Practice Quiz", reason: "At 45% mastery, active recall through quizzes will strengthen your understanding.", link: "/question" },
+    { topic: "Fourier Transform", mastery: 9, level: "needs_attention", minutes: 40, activity: "guided_learning", activity_label: "Guided Learning", reason: "Build foundational understanding before attempting problems", link: "/guide" },
+    { topic: "Chain Rule", mastery: 48, level: "developing", minutes: 30, activity: "practice", activity_label: "Quiz", reason: "Recalibrate your confidence with a focused assessment", link: "/question" },
+    { topic: "Integration by Parts", mastery: 18, level: "needs_attention", minutes: 30, activity: "practice", activity_label: "First Assessment", reason: "Take your first quiz to measure real understanding", link: "/question" },
+    { topic: "Taylor Series", mastery: 38, level: "beginner", minutes: 20, activity: "practice", activity_label: "Review", reason: "Reverse the declining trend with targeted practice", link: "/question" },
   ],
-  total_planned_minutes: 120,
 };
 
-// Utility functions
-function getMasteryColor(mastery: number): string {
-  if (mastery >= 80) return "text-emerald-400";
-  if (mastery >= 60) return "text-blue-400";
-  if (mastery >= 40) return "text-amber-400";
-  return "text-red-400";
-}
-
-function getMasteryBg(mastery: number): string {
-  if (mastery >= 80) return "from-emerald-500/20 to-emerald-500/5";
-  if (mastery >= 60) return "from-blue-500/20 to-blue-500/5";
-  if (mastery >= 40) return "from-amber-500/20 to-amber-500/5";
-  return "from-red-500/20 to-red-500/5";
-}
-
-function getMasteryBarColor(mastery: number): string {
-  if (mastery >= 80) return "bg-emerald-500";
-  if (mastery >= 60) return "bg-blue-500";
-  if (mastery >= 40) return "bg-amber-500";
-  return "bg-red-500";
-}
-
-function getMasteryGlow(mastery: number): string {
-  if (mastery >= 80) return "shadow-emerald-500/20";
-  if (mastery >= 60) return "shadow-blue-500/20";
-  if (mastery >= 40) return "shadow-amber-500/20";
-  return "shadow-red-500/20";
-}
-
-function getInsightIcon(type: string) {
-  switch (type) {
-    case "weakness": return <AlertTriangle className="w-5 h-5 text-red-400" />;
-    case "decay": return <Clock className="w-5 h-5 text-amber-400" />;
-    case "strength": return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
-    case "consistency": return <TrendingUp className="w-5 h-5 text-blue-400" />;
-    default: return <Lightbulb className="w-5 h-5 text-violet-400" />;
-  }
-}
-
-function getInsightBorder(severity: string): string {
-  switch (severity) {
-    case "high": return "border-red-500/30 hover:border-red-500/50";
-    case "medium": return "border-amber-500/30 hover:border-amber-500/50";
-    case "positive": return "border-emerald-500/30 hover:border-emerald-500/50";
-    default: return "border-white/[0.08] hover:border-violet-500/30";
-  }
-}
-
-function getActivityIcon(activity: string) {
-  switch (activity) {
-    case "question": return <PenTool className="w-4 h-4" />;
-    case "solve": return <Calculator className="w-4 h-4" />;
-    case "research": return <Microscope className="w-4 h-4" />;
-    case "chat": return <MessageCircle className="w-4 h-4" />;
-    default: return <BookOpen className="w-4 h-4" />;
-  }
-}
-
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
+// ── Helpers ───────────────────────────────────────────────────────────
+const mc = (m: number) => m >= 80 ? "#34d399" : m >= 60 ? "#60a5fa" : m >= 40 ? "#fbbf24" : "#f87171";
+const mtc = (m: number) => m >= 80 ? "text-emerald-400" : m >= 60 ? "text-blue-400" : m >= 40 ? "text-amber-400" : "text-red-400";
+const mbg = (m: number) => m >= 80 ? "bg-emerald-500" : m >= 60 ? "bg-blue-500" : m >= 40 ? "bg-amber-500" : "bg-red-500";
+const levelBadge: Record<string, { label: string; cls: string }> = {
+  mastered: { label: "Mastered", cls: "text-emerald-300 bg-emerald-500/15" },
+  proficient: { label: "Proficient", cls: "text-blue-300 bg-blue-500/15" },
+  developing: { label: "Developing", cls: "text-amber-300 bg-amber-500/15" },
+  beginner: { label: "Beginner", cls: "text-orange-300 bg-orange-500/15" },
+  needs_attention: { label: "Needs Work", cls: "text-red-300 bg-red-500/15" },
 };
+const planIcon = (a: string) => a === "guided_learning" ? <GraduationCap className="w-5 h-5" /> : a === "practice" ? <PenTool className="w-5 h-5" /> : <Calculator className="w-5 h-5" />;
+const planColor = (a: string) => a === "guided_learning" ? { text: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/25", ring: "ring-violet-500/20" } : a === "practice" ? { text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/25", ring: "ring-blue-500/20" } : { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/25", ring: "ring-emerald-500/20" };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
-};
-
-// Custom tooltip for charts
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
+function Ring({ value, size = 44, stroke = 3.5 }: { value: number; size?: number; stroke?: number }) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   return (
-    <div className="bg-[#1a1a2e]/95 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl">
-      <p className="text-xs text-slate-400 mb-1">{label}</p>
-      {payload.map((entry: any, i: number) => (
-        <p key={i} className="text-sm font-semibold text-white">
-          {entry.name}: <span className="text-violet-400">{entry.value}%</span>
-        </p>
-      ))}
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={mc(value)} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} className="transition-all duration-700" />
+      </svg>
+      <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${mtc(value)}`}>{Math.round(value)}</span>
     </div>
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════
 export default function DashboardPage() {
   const [state, setState] = useState<LearningState | null>(null);
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [studyHours, setStudyHours] = useState(2);
-  const [showPlan, setShowPlan] = useState(false);
   const [usingDemo, setUsingDemo] = useState(false);
+  const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [expandedInsight, setExpandedInsight] = useState<number | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (forceRefresh = false) => {
+    if (!state) setLoading(true);
+    if (forceRefresh) setRefreshing(true);
     try {
-      const res = await fetch(apiUrl("/api/v1/learning-state/"));
+      const url = forceRefresh ? apiUrl("/api/v1/learning-state/?refresh=true") : apiUrl("/api/v1/learning-state/");
+      const res = await fetch(url);
       const data: LearningState = await res.json();
-
-      // If no topics, use demo data
-      if (data.topics.length === 0) {
-        setState(DEMO_STATE);
-        setPlan(DEMO_PLAN);
-        setUsingDemo(true);
-      } else {
-        setState(data);
-        setUsingDemo(false);
-        // Fetch study plan
-        const planRes = await fetch(apiUrl(`/api/v1/learning-state/recommendations?hours=${studyHours}`));
-        const planData: StudyPlan = await planRes.json();
-        setPlan(planData);
+      if (data.topics.length === 0) { setState(DEMO_STATE); setPlan(DEMO_PLAN); setUsingDemo(true); }
+      else {
+        setState(data); setUsingDemo(false);
+        const pr = await fetch(apiUrl(`/api/v1/learning-state/recommendations?hours=${studyHours}`));
+        setPlan(await pr.json());
       }
-    } catch {
-      // Fallback to demo data
-      setState(DEMO_STATE);
-      setPlan(DEMO_PLAN);
-      setUsingDemo(true);
-    } finally {
-      setLoading(false);
-    }
+    } catch { setState(DEMO_STATE); setPlan(DEMO_PLAN); setUsingDemo(true); }
+    finally { setLoading(false); setRefreshing(false); }
   }, [studyHours]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center animate-pulse">
-            <Brain className="w-6 h-6 text-white" />
-          </div>
-          <p className="text-slate-400 text-sm">Analyzing your learning state...</p>
-        </div>
+  const scheduleBlocks = useMemo(() => {
+    if (!plan?.plan.length) return [];
+    const now = new Date();
+    let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0);
+    return plan.plan.map((item) => {
+      const end = new Date(start.getTime() + item.minutes * 60000);
+      const block = { ...item, startTime: start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), endTime: end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+      start = end;
+      return block;
+    });
+  }, [plan]);
+
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center animate-pulse"><Brain className="w-5 h-5 text-white" /></div>
+        <p className="text-sm text-slate-500">Analyzing your learning...</p>
       </div>
-    );
-  }
-
+    </div>
+  );
   if (!state) return null;
 
-  // Prepare radar chart data (top 8 topics by interaction count)
-  const radarData = state.topics
-    .sort((a, b) => b.attempts - a.attempts)
-    .slice(0, 8)
-    .map((t) => ({
-      topic: t.topic.length > 18 ? t.topic.slice(0, 16) + "..." : t.topic,
-      mastery: t.mastery,
-      fullMark: 100,
-    }));
+  const ov = state.overview;
+  const lb = (l: string) => levelBadge[l] || levelBadge.needs_attention;
 
   return (
-    <motion.div
-      className="h-screen flex flex-col overflow-hidden"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="shrink-0 px-6 pt-6 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Learning State
-              </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {usingDemo ? "Demo data — start learning to see your real progress" : "Your personalized learning analytics"}
-              </p>
-            </div>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* ── Header ── */}
+      <div className="shrink-0 px-6 py-3.5 flex items-center justify-between border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <Brain className="w-4 h-4 text-white" />
           </div>
-          <div className="flex items-center gap-3">
-            {usingDemo && (
-              <span className="px-3 py-1.5 text-xs font-medium bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20">
-                Demo Mode
-              </span>
-            )}
-            <button
-              onClick={fetchData}
-              className="p-2.5 rounded-xl bg-white/5 border border-white/[0.08] hover:border-violet-500/30 text-slate-400 hover:text-violet-400 transition-all"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
+          <div>
+            <h1 className="text-[15px] font-semibold text-white">Learning Dashboard</h1>
+            <p className="text-[10px] text-slate-500 -mt-0.5">{usingDemo ? "Demo mode — upload a knowledge base to begin" : new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
           </div>
         </div>
-      </motion.div>
+        <button onClick={() => fetchData(true)} disabled={refreshing} className="p-2 rounded-lg hover:bg-white/[0.05] text-slate-500 hover:text-violet-400 transition disabled:opacity-40">
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+        </button>
+      </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
-        {/* Stats Row */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              label: "Overall Mastery",
-              value: `${state.overview.average_mastery}%`,
-              icon: <Target className="w-5 h-5" />,
-              color: "from-violet-500 to-blue-500",
-              textColor: "text-violet-400",
-            },
-            {
-              label: "Topics Studied",
-              value: state.overview.total_topics,
-              icon: <BookOpen className="w-5 h-5" />,
-              color: "from-blue-500 to-cyan-500",
-              textColor: "text-blue-400",
-            },
-            {
-              label: "Total Interactions",
-              value: state.overview.total_interactions,
-              icon: <Zap className="w-5 h-5" />,
-              color: "from-amber-500 to-orange-500",
-              textColor: "text-amber-400",
-            },
-            {
-              label: "Needs Attention",
-              value: state.overview.topics_needs_attention,
-              icon: <AlertTriangle className="w-5 h-5" />,
-              color: "from-red-500 to-pink-500",
-              textColor: "text-red-400",
-            },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              variants={itemVariants}
-              className="relative overflow-hidden rounded-2xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-5 hover:border-violet-500/20 dark:hover:border-violet-500/20 transition-all group"
-            >
-              <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-[0.07] rounded-bl-[60px] group-hover:opacity-[0.12] transition-opacity`} />
-              <div className={`inline-flex p-2 rounded-xl bg-gradient-to-br ${stat.color} bg-opacity-10 mb-3`}>
-                <span className="text-white">{stat.icon}</span>
-              </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
+      {/* ── Scrollable Content ── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-[1100px] mx-auto px-6 py-6 space-y-8">
 
-        {/* Main Grid: Radar Chart + Topic Mastery */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Radar Chart */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:col-span-2 rounded-2xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-violet-400" />
-                Knowledge Map
-              </h2>
-            </div>
-            {radarData.length > 0 ? (
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
-                    <PolarGrid stroke="rgba(255,255,255,0.06)" />
-                    <PolarAngleAxis
-                      dataKey="topic"
-                      tick={{ fill: "rgba(148,163,184,0.8)", fontSize: 11 }}
-                    />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 100]}
-                      tick={{ fill: "rgba(148,163,184,0.5)", fontSize: 10 }}
-                      axisLine={false}
-                    />
-                    <Radar
-                      name="Mastery"
-                      dataKey="mastery"
-                      stroke="#8b5cf6"
-                      fill="url(#radarGradient)"
-                      fillOpacity={0.5}
-                      strokeWidth={2}
-                    />
-                    <defs>
-                      <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.2} />
-                      </linearGradient>
-                    </defs>
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">
-                No topic data yet
-              </div>
-            )}
-          </motion.div>
-
-          {/* Topic Mastery List */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:col-span-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-              <Target className="w-5 h-5 text-violet-400" />
-              Topic Mastery
-            </h2>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-              {state.topics.map((topic, i) => (
-                <motion.div
-                  key={topic.topic}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.4 }}
-                  className={`flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r ${getMasteryBg(topic.mastery)} border border-white/[0.04] hover:border-white/[0.12] transition-all group cursor-default`}
-                >
-                  {/* Mastery circle */}
-                  <div className={`relative w-12 h-12 rounded-full flex items-center justify-center border-2 ${
-                    topic.mastery >= 80 ? "border-emerald-500/40" :
-                    topic.mastery >= 60 ? "border-blue-500/40" :
-                    topic.mastery >= 40 ? "border-amber-500/40" : "border-red-500/40"
-                  }`}>
-                    <span className={`text-sm font-bold ${getMasteryColor(topic.mastery)}`}>
-                      {Math.round(topic.mastery)}
-                    </span>
-                    {/* SVG ring progress */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
-                      <circle
-                        cx="24" cy="24" r="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeDasharray={`${(topic.mastery / 100) * 125.6} 125.6`}
-                        className={getMasteryColor(topic.mastery)}
-                        strokeLinecap="round"
-                        opacity={0.6}
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Topic info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                      {topic.topic}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {topic.attempts} attempts
-                      </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {topic.days_since_last < 1 ? "Today" : `${Math.round(topic.days_since_last)}d ago`}
-                      </span>
-                      <div className="flex gap-1">
-                        {Object.entries(topic.interaction_types).map(([type, count]) => (
-                          <span key={type} className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 dark:text-slate-500 bg-white/5 px-1.5 py-0.5 rounded-full">
-                            {getActivityIcon(type)}
-                            {count}
-                          </span>
-                        ))}
-                      </div>
+          {/* ═══════════════════════════════════════════════════════════
+               SECTION 1 — Overview Stats
+             ═══════════════════════════════════════════════════════════ */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: "Avg Mastery", value: `${ov.average_mastery}%`, icon: Target, color: mc(ov.average_mastery), desc: ov.average_mastery >= 60 ? "On track" : "Room to grow" },
+                { label: "Topics", value: ov.total_topics, icon: BookOpen, color: "#8b5cf6", desc: `${ov.topics_mastered} mastered` },
+                { label: "Activities", value: ov.total_interactions, icon: Zap, color: "#3b82f6", desc: "total interactions" },
+                { label: "At Risk", value: ov.topics_needs_attention, icon: AlertTriangle, color: ov.topics_needs_attention > 0 ? "#f87171" : "#34d399", desc: ov.topics_needs_attention > 0 ? "need attention" : "all good" },
+              ].map(({ label, value, icon: Icon, color, desc }) => (
+                <div key={label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+                      <Icon className="w-4 h-4" style={{ color }} />
                     </div>
+                    <span className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">{label}</span>
                   </div>
-
-                  {/* Mastery bar */}
-                  <div className="w-24 hidden sm:block">
-                    <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full ${getMasteryBarColor(topic.mastery)}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${topic.mastery}%` }}
-                        transition={{ delay: 0.3 + i * 0.05, duration: 0.8, ease: "easeOut" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Level badge */}
-                  <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full ${
-                    topic.level === "mastered" ? "bg-emerald-500/10 text-emerald-400" :
-                    topic.level === "proficient" ? "bg-blue-500/10 text-blue-400" :
-                    topic.level === "developing" ? "bg-amber-500/10 text-amber-400" :
-                    "bg-red-500/10 text-red-400"
-                  } hidden md:block`}>
-                    {topic.level.replace("_", " ")}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Learning Timeline */}
-        <motion.div
-          variants={itemVariants}
-          className="rounded-2xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-violet-400" />
-              Learning Trajectory
-            </h2>
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <Calendar className="w-3.5 h-3.5" />
-              Last {state.timeline.length} days
-            </div>
-          </div>
-          {state.timeline.length > 0 ? (
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={state.timeline}>
-                  <defs>
-                    <linearGradient id="masteryGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: "rgba(148,163,184,0.6)", fontSize: 11 }}
-                    tickFormatter={(v) => v.slice(5)} // Show MM-DD
-                    axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    tick={{ fill: "rgba(148,163,184,0.6)", fontSize: 11 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
-                    tickFormatter={(v) => `${v}%`}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="mastery"
-                    name="Mastery"
-                    stroke="#8b5cf6"
-                    strokeWidth={2.5}
-                    fill="url(#masteryGradient)"
-                    dot={{ fill: "#8b5cf6", strokeWidth: 0, r: 4 }}
-                    activeDot={{ fill: "#a78bfa", stroke: "#8b5cf6", strokeWidth: 2, r: 6 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-[220px] flex items-center justify-center text-slate-500 dark:text-slate-500">
-              Not enough data for timeline yet
-            </div>
-          )}
-        </motion.div>
-
-        {/* Insights + Study Planner */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* AI Insights */}
-          <motion.div variants={itemVariants}>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-violet-400" />
-              AI Insights
-              <span className="text-xs font-normal text-slate-500 dark:text-slate-400 ml-1">Explainable recommendations</span>
-            </h2>
-            <div className="space-y-3">
-              {state.insights.map((insight, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                >
-                  <Link
-                    href={insight.action_link}
-                    className={`block p-4 rounded-xl bg-white dark:bg-white/[0.03] border ${getInsightBorder(insight.severity)} transition-all group hover:shadow-lg hover:shadow-black/10`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5">{getInsightIcon(insight.type)}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                          {insight.title}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                          {insight.description}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-2.5 text-xs font-medium text-violet-500 dark:text-violet-400 group-hover:text-violet-300 transition-colors">
-                          {insight.action}
-                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Study Planner */}
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <Timer className="w-5 h-5 text-violet-400" />
-                AI Study Planner
-              </h2>
-              <div className="flex items-center gap-2">
-                <select
-                  value={studyHours}
-                  onChange={(e) => setStudyHours(Number(e.target.value))}
-                  className="text-xs bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-lg px-2 py-1.5 text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                >
-                  <option value={0.5}>30 min</option>
-                  <option value={1}>1 hour</option>
-                  <option value={2}>2 hours</option>
-                  <option value={3}>3 hours</option>
-                </select>
-              </div>
-            </div>
-
-            {plan && plan.plan.length > 0 ? (
-              <div className="space-y-3">
-                {/* Total time bar */}
-                <div className="p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-blue-500/10 border border-violet-500/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-slate-400">Study Plan</span>
-                    <span className="text-xs font-bold text-violet-400">
-                      {plan.total_planned_minutes} min planned
-                    </span>
-                  </div>
-                  <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden flex">
-                    {plan.plan.map((item, i) => (
-                      <motion.div
-                        key={i}
-                        className={`h-full ${
-                          i % 4 === 0 ? "bg-violet-500" :
-                          i % 4 === 1 ? "bg-blue-500" :
-                          i % 4 === 2 ? "bg-cyan-500" : "bg-emerald-500"
-                        }`}
-                        style={{ width: `${(item.minutes / plan.total_planned_minutes) * 100}%` }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(item.minutes / plan.total_planned_minutes) * 100}%` }}
-                        transition={{ delay: 0.5 + i * 0.15, duration: 0.6 }}
-                      />
-                    ))}
-                  </div>
+                  <p className="text-2xl font-bold text-white">{value}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{desc}</p>
                 </div>
-
-                {/* Plan items */}
-                {plan.plan.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 + i * 0.1 }}
-                  >
-                    <Link
-                      href={item.link}
-                      className="block p-4 rounded-xl bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] hover:border-violet-500/30 transition-all group"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          item.activity === "guided_learning" ? "bg-violet-500/10" :
-                          item.activity === "practice" ? "bg-blue-500/10" :
-                          "bg-emerald-500/10"
-                        }`}>
-                          {item.activity === "guided_learning" ? (
-                            <GraduationCap className={`w-5 h-5 ${
-                              item.activity === "guided_learning" ? "text-violet-400" : "text-blue-400"
-                            }`} />
-                          ) : item.activity === "practice" ? (
-                            <PenTool className="w-5 h-5 text-blue-400" />
-                          ) : (
-                            <Calculator className="w-5 h-5 text-emerald-400" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                              {item.topic}
-                            </p>
-                            <span className="text-xs font-bold text-violet-400 ml-2 flex-shrink-0">
-                              {item.minutes} min
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                            {item.reason}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
-                              item.activity === "guided_learning" ? "bg-violet-500/10 text-violet-400" :
-                              item.activity === "practice" ? "bg-blue-500/10 text-blue-400" :
-                              "bg-emerald-500/10 text-emerald-400"
-                            }`}>
-                              {item.activity_label}
-                            </span>
-                            <span className={`text-[10px] font-semibold ${getMasteryColor(item.mastery)}`}>
-                              {Math.round(item.mastery)}% mastery
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all self-center" />
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 rounded-xl bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] text-center">
-                <Timer className="w-8 h-8 text-slate-400 mx-auto mb-3" />
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Start learning to get personalized study plans
-                </p>
-              </div>
-            )}
+              ))}
+            </div>
           </motion.div>
-        </div>
 
-        {/* Activity Breakdown */}
-        {Object.keys(state.activity_breakdown).length > 0 && (
-          <motion.div
-            variants={itemVariants}
-            className="rounded-2xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-6"
-          >
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-              <BarChart3 className="w-5 h-5 text-violet-400" />
-              Activity Breakdown
+          {/* ═══════════════════════════════════════════════════════════
+               SECTION 2 — Topic Mastery
+             ═══════════════════════════════════════════════════════════ */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <Target className="w-4 h-4 text-violet-400" />
+              Topic Mastery
+              <span className="text-[10px] text-slate-500 font-normal ml-auto">{state.topics.length} topics</span>
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(state.activity_breakdown).map(([type, count], i) => {
-                const total = Object.values(state.activity_breakdown).reduce((a, b) => a + b, 0);
-                const pct = Math.round((count / total) * 100);
-                const colorMap: Record<string, string> = {
-                  question: "from-violet-500 to-purple-500",
-                  solve: "from-blue-500 to-cyan-500",
-                  research: "from-emerald-500 to-green-500",
-                  chat: "from-amber-500 to-orange-500",
-                };
-                const bgMap: Record<string, string> = {
-                  question: "bg-violet-500/10",
-                  solve: "bg-blue-500/10",
-                  research: "bg-emerald-500/10",
-                  chat: "bg-amber-500/10",
-                };
-                const textMap: Record<string, string> = {
-                  question: "text-violet-400",
-                  solve: "text-blue-400",
-                  research: "text-emerald-400",
-                  chat: "text-amber-400",
-                };
 
+            <div className="space-y-2">
+              {state.topics.map((t, i) => {
+                const has = (t.assessment_stats?.total ?? 0) > 0;
+                const badge = lb(t.level);
+                const isOpen = expandedTopic === t.topic;
                 return (
-                  <motion.div
-                    key={type}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 + i * 0.1 }}
-                    className="text-center p-4 rounded-xl bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]"
-                  >
-                    <div className={`inline-flex p-2.5 rounded-xl ${bgMap[type] || "bg-slate-500/10"} mb-3`}>
-                      {getActivityIcon(type)}
-                    </div>
-                    <p className={`text-xl font-bold ${textMap[type] || "text-slate-400"}`}>{count}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 capitalize mt-0.5">{type}</p>
-                    <div className="mt-2 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full bg-gradient-to-r ${colorMap[type] || "from-slate-500 to-slate-400"}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ delay: 1 + i * 0.1, duration: 0.8 }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-1">{pct}%</p>
+                  <motion.div key={t.topic} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                    <button
+                      onClick={() => setExpandedTopic(isOpen ? null : t.topic)}
+                      className={`w-full text-left rounded-2xl border transition-all duration-200 ${
+                        isOpen ? "bg-white/[0.04] border-violet-500/20" : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4 px-5 py-4">
+                        <Ring value={t.mastery} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-sm font-medium text-white truncate">{t.topic}</span>
+                            {t.velocity?.direction === "improving" && <TrendingUp className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />}
+                            {t.velocity?.direction === "declining" && <TrendingDown className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
+                            {t.calibration?.is_overconfident && <Eye className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badge.cls}`}>{badge.label}</span>
+                            <span className="text-[11px] text-slate-500">{has ? `${t.assessment_stats!.correct}/${t.assessment_stats!.total} correct` : "No assessments"}</span>
+                            <span className="text-[11px] text-slate-600">{t.days_since_last < 1 ? "Active today" : `${Math.round(t.days_since_last)}d ago`}</span>
+                          </div>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="w-32 flex-shrink-0 hidden md:block">
+                          <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                            <motion.div className="h-full rounded-full" style={{ backgroundColor: mc(t.mastery) }}
+                              initial={{ width: 0 }} animate={{ width: `${t.mastery}%` }} transition={{ delay: 0.1 + i * 0.03, duration: 0.6 }} />
+                          </div>
+                        </div>
+                        <ChevronRight className={`w-4 h-4 text-slate-600 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+                      </div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                          <div className="mt-1 mb-2 p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-4">
+                            {t.explanation && <p className="text-xs text-slate-400 italic">{t.explanation}</p>}
+                            {t.mastery_breakdown && (
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {[
+                                  { label: "Knowledge", val: t.mastery_breakdown.bkt_score, max: 55, sub: "BKT probability from assessments", color: "#8b5cf6" },
+                                  { label: "Engagement", val: t.mastery_breakdown.exposure_credit, max: 20, sub: "Credit from study activities", color: "#3b82f6" },
+                                  { label: "Retention", val: t.mastery_breakdown.retention_mod, max: 15, sub: "Memory decay factor", color: t.mastery_breakdown.retention_mod >= 0 ? "#34d399" : "#f87171" },
+                                  { label: "Calibration", val: t.mastery_breakdown.calibration_mod, max: 10, sub: "Confidence vs accuracy", color: t.mastery_breakdown.calibration_mod >= 0 ? "#22d3ee" : "#fbbf24" },
+                                ].map(b => (
+                                  <div key={b.label} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                                    <div className="flex justify-between items-baseline mb-2">
+                                      <span className="text-[10px] text-slate-500 font-medium">{b.label}</span>
+                                      <span className="text-sm font-bold text-white">{b.val > 0 ? "+" : ""}{b.val.toFixed(0)}</span>
+                                    </div>
+                                    <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-1.5">
+                                      <div className="h-full rounded-full" style={{ width: `${Math.max(3, (Math.abs(b.val) / b.max) * 100)}%`, backgroundColor: b.color, transition: "width 0.4s" }} />
+                                    </div>
+                                    <p className="text-[9px] text-slate-600">{b.sub}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {!has && (
+                              <Link href="/question" className="flex items-center justify-center gap-2 py-3 rounded-xl bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/15 transition">
+                                <PenTool className="w-4 h-4 text-violet-400" />
+                                <span className="text-xs font-semibold text-violet-400">Take a quiz to unlock knowledge tracking</span>
+                              </Link>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 );
               })}
             </div>
           </motion.div>
-        )}
+
+          {/* ═══════════════════════════════════════════════════════════
+               SECTION 3 — Study Plan (full-width, spacious calendar)
+             ═══════════════════════════════════════════════════════════ */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-violet-400" />
+                Today&apos;s Study Plan
+              </h2>
+              <div className="flex items-center gap-3">
+                {plan && <span className="text-[11px] text-slate-500"><Timer className="w-3.5 h-3.5 inline mr-1" />{plan.total_planned_minutes} min total</span>}
+                <select value={studyHours} onChange={(e) => setStudyHours(Number(e.target.value))}
+                  className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-slate-400 focus:outline-none focus:border-violet-500/30">
+                  <option value={0.5}>30 min</option><option value={1}>1 hour</option><option value={2}>2 hours</option><option value={3}>3 hours</option>
+                </select>
+              </div>
+            </div>
+
+            {scheduleBlocks.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {scheduleBlocks.map((block, i) => {
+                  const pc = planColor(block.activity);
+                  return (
+                    <Link key={i} href={block.link} className={`group relative rounded-2xl border ${pc.border} ${pc.bg} p-5 hover:ring-1 ${pc.ring} transition-all`}>
+                      {/* Time badge */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${pc.bg} border ${pc.border} ${pc.text}`}>
+                            {planIcon(block.activity)}
+                          </div>
+                          <div>
+                            <p className={`text-xs font-semibold ${pc.text}`}>{block.activity_label}</p>
+                            <p className="text-[10px] text-slate-500">{block.startTime} — {block.endTime}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <span className="text-[11px] font-medium text-slate-400">{block.minutes} min</span>
+                        </div>
+                      </div>
+
+                      {/* Topic */}
+                      <h3 className="text-base font-semibold text-white mb-1.5">{block.topic}</h3>
+                      <p className="text-xs text-slate-400 leading-relaxed mb-4">{block.reason}</p>
+
+                      {/* Bottom bar */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-16 bg-white/[0.06] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${block.mastery}%`, backgroundColor: mc(block.mastery) }} />
+                          </div>
+                          <span className={`text-[10px] font-semibold ${mtc(block.mastery)}`}>{block.mastery}%</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Start <Play className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+                <Calendar className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                <p className="text-sm text-slate-500">Start learning to get a personalized study plan</p>
+              </div>
+            )}
+          </motion.div>
+
+          {/* ═══════════════════════════════════════════════════════════
+               SECTION 4 — AI Insights (full-width, 2-col, expandable)
+             ═══════════════════════════════════════════════════════════ */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-violet-400" />
+                AI Insights
+              </h2>
+              <span className="text-[10px] text-slate-600 bg-white/[0.04] px-2 py-0.5 rounded-full">cached</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {state.insights.map((ins, i) => {
+                const isAlert = ins.severity === "high";
+                const isGood = ins.severity === "positive";
+                const isOpen = expandedInsight === i;
+
+                // Distinct left accent + icon colors
+                const accent = isAlert ? "border-l-red-400" : isGood ? "border-l-emerald-400" : "border-l-amber-400";
+                const iconColor = isAlert ? "text-red-400" : isGood ? "text-emerald-400" : "text-amber-400";
+                const iconEl = isAlert ? <AlertTriangle className="w-4 h-4" /> : isGood ? <CheckCircle2 className="w-4 h-4" /> : <Lightbulb className="w-4 h-4" />;
+
+                return (
+                  <div key={i} className={`rounded-xl border border-white/[0.08] bg-[#13131f] border-l-[3px] ${accent} overflow-hidden transition-all hover:border-white/[0.12]`}>
+                    <button onClick={() => setExpandedInsight(isOpen ? null : i)} className="w-full text-left px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className={`${iconColor} flex-shrink-0`}>{iconEl}</span>
+                        <p className="text-[13px] font-semibold text-slate-200 flex-1 truncate">{ins.title}</p>
+                        <ChevronDown className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                      </div>
+                      {ins.topic && <p className="text-[10px] text-slate-500 mt-1 ml-7">{ins.topic}</p>}
+                    </button>
+
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                          <div className="px-5 pb-4 pt-0 ml-7 border-t border-white/[0.05]">
+                            <p className="text-[12px] text-slate-400 leading-relaxed mt-3">{ins.description}</p>
+                            <Link href={ins.action_link} className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-400 hover:bg-violet-500/20 transition">
+                              {ins.action} <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* ═══════════════════════════════════════════════════════════
+               SECTION 5 — Quick Actions
+             ═══════════════════════════════════════════════════════════ */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { href: "/question", icon: PenTool, label: "Take a Quiz", desc: "Test your knowledge", color: "violet" },
+                { href: "/solver", icon: Calculator, label: "Smart Solver", desc: "Solve problems step-by-step", color: "blue" },
+                { href: "/guide", icon: GraduationCap, label: "Guided Learning", desc: "Structured learning paths", color: "emerald" },
+              ].map(({ href, icon: Icon, label, desc, color }) => (
+                <Link key={label} href={href}
+                  className={`group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-${color}-500/25 hover:bg-${color}-500/[0.04] transition-all`}
+                >
+                  <Icon className={`w-5 h-5 text-slate-500 group-hover:text-${color}-400 transition mb-3`} />
+                  <p className="text-sm font-medium text-white">{label}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{desc}</p>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Bottom spacing */}
+          <div className="h-4" />
+
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
