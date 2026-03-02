@@ -769,8 +769,8 @@ def _generate_study_plan(topics: dict, mastery_results: dict, hours: float = 2.0
 
 
 # ── Timeline ─────────────────────────────────────────────────────────
-def _build_timeline(topics: dict) -> list[dict]:
-    """Build a timeline of mastery progression."""
+def _build_timeline(topics: dict, mastery_results: dict | None = None) -> list[dict]:
+    """Build a timeline of mastery progression with cumulative average mastery."""
     all_events = []
     for topic, data in topics.items():
         for i, ts in enumerate(data["timestamps"]):
@@ -785,6 +785,7 @@ def _build_timeline(topics: dict) -> list[dict]:
     if all_events:
         current_day = None
         day_topics: set[str] = set()
+        cumulative_topics: set[str] = set()
         day_count = 0
 
         for event in all_events:
@@ -792,26 +793,36 @@ def _build_timeline(topics: dict) -> list[dict]:
 
             if day != current_day:
                 if current_day:
+                    # Compute cumulative average mastery across all topics seen so far
+                    avg = 0
+                    if mastery_results and cumulative_topics:
+                        scores = [mastery_results[t]["mastery"] for t in cumulative_topics if t in mastery_results]
+                        avg = round(sum(scores) / len(scores)) if scores else 0
                     daily_snapshots.append({
                         "date": current_day,
                         "topics_studied": len(day_topics),
                         "total_interactions": day_count,
-                        "mastery": 0,  # Will be filled after
+                        "mastery": avg,
                     })
                 current_day = day
                 day_topics = set()
                 day_count = 0
 
             day_topics.add(event["topic"])
+            cumulative_topics.add(event["topic"])
             day_count += 1
 
         # Last day
         if current_day:
+            avg = 0
+            if mastery_results and cumulative_topics:
+                scores = [mastery_results[t]["mastery"] for t in cumulative_topics if t in mastery_results]
+                avg = round(sum(scores) / len(scores)) if scores else 0
             daily_snapshots.append({
                 "date": current_day,
                 "topics_studied": len(day_topics),
                 "total_interactions": day_count,
-                "mastery": 0,
+                "mastery": avg,
             })
 
     return daily_snapshots
@@ -951,7 +962,7 @@ async def get_learning_state(refresh: bool = Query(False, description="Force ref
         _save_insights_cache(insights, data_hash)
 
     # Timeline
-    timeline = _build_timeline(topics)
+    timeline = _build_timeline(topics, mastery_results)
 
     # Activity breakdown
     type_breakdown = {}
@@ -998,5 +1009,6 @@ async def get_learning_timeline():
     """Get mastery progression timeline data."""
     entries = history_manager.get_recent(limit=100)
     topics = _extract_topics_from_history(entries)
-    timeline = _build_timeline(topics)
+    mastery_results = {topic: _compute_mastery(data) for topic, data in topics.items()}
+    timeline = _build_timeline(topics, mastery_results)
     return {"timeline": timeline}

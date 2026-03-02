@@ -22,6 +22,7 @@ import {
   Check,
   X,
   Brain,
+  Network,
   LucideIcon,
 } from "lucide-react";
 import { useGlobal } from "@/context/GlobalContext";
@@ -43,6 +44,7 @@ const ALL_NAV_ITEMS: Record<string, { icon: LucideIcon; nameKey: string }> = {
   "/dashboard": { icon: Brain, nameKey: "Learning State" },
   "/history": { icon: History, nameKey: "History" },
   "/knowledge": { icon: BookOpen, nameKey: "Knowledge Bases" },
+  "/kg": { icon: Network, nameKey: "Knowledge Graph" },
   "/notebook": { icon: Book, nameKey: "Notebooks" },
   "/question": { icon: PenTool, nameKey: "Question Generator" },
   "/solver": { icon: Calculator, nameKey: "Smart Solver" },

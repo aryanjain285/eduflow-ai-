@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   PenTool,
   Loader2,
@@ -21,6 +22,8 @@ import {
   Clock,
   ChevronRight,
   Play,
+  TrendingUp,
+  X,
 } from "lucide-react";
 import { useGlobal } from "@/context/GlobalContext";
 import ReactMarkdown from "react-markdown";
@@ -57,6 +60,8 @@ export default function QuestionPage() {
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [confidenceRatings, setConfidenceRatings] = useState<Record<number, number>>({});
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [masteryFeedback, setMasteryFeedback] = useState<{ prev: number; next: number; level: string } | null>(null);
+  const [topicMasteryCache, setTopicMasteryCache] = useState<Record<string, number>>({});
   const [pastBatches, setPastBatches] = useState<Array<{
     batch_id: string; timestamp: string | null; topic: string;
     difficulty: string; question_type: string; requested: number; completed: number; failed: number;
@@ -167,6 +172,8 @@ export default function QuestionPage() {
       const topic =
         q.knowledge_point || questionState.selectedKb || questionState.topic || "Unknown";
 
+      const prevMastery = topicMasteryCache[topic] ?? 0;
+
       fetch(apiUrl("/api/v1/learning-state/record-assessment"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,7 +188,16 @@ export default function QuestionPage() {
           question_type: q.question_type || q.type || "choice",
           topic,
         }),
-      }).catch(() => {}); // Fire-and-forget, don't block UI
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && typeof data.mastery === "number") {
+            setTopicMasteryCache((prev) => ({ ...prev, [topic]: data.mastery }));
+            setMasteryFeedback({ prev: prevMastery, next: data.mastery, level: data.level || "" });
+            setTimeout(() => setMasteryFeedback(null), 4000);
+          }
+        })
+        .catch(() => {});
     }
   };
 
@@ -1074,6 +1090,35 @@ export default function QuestionPage() {
         count={questionState.count}
         onClearLogs={() => setQuestionState((prev) => ({ ...prev, logs: [] }))}
       />
+
+      {/* Mastery Delta Toast */}
+      <AnimatePresence>
+        {masteryFeedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#1e1b2e] border border-violet-500/25 shadow-2xl shadow-violet-500/10"
+          >
+            <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-violet-400" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Mastery Updated</p>
+              <p className="text-sm font-bold text-white">
+                {masteryFeedback.prev}% → {masteryFeedback.next}%
+                <span className={`ml-1.5 text-xs font-semibold ${masteryFeedback.next >= masteryFeedback.prev ? "text-emerald-400" : "text-red-400"}`}>
+                  ({masteryFeedback.next >= masteryFeedback.prev ? "+" : ""}{masteryFeedback.next - masteryFeedback.prev}%)
+                </span>
+              </p>
+            </div>
+            <button onClick={() => setMasteryFeedback(null)} className="ml-2 p-1 rounded-lg hover:bg-white/[0.08] text-slate-500 hover:text-white transition">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add to Notebook Modal */}
       {currentQuestion && (

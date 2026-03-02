@@ -25,7 +25,7 @@ export const DEFAULT_SIDEBAR_DESCRIPTION = "";
  * Default navigation order
  */
 export const DEFAULT_NAV_ORDER: SidebarNavOrder = {
-  start: ["/", "/dashboard", "/history", "/knowledge", "/notebook"],
+  start: ["/", "/dashboard", "/history", "/knowledge", "/kg", "/notebook"],
   learnResearch: [
     "/question",
     "/solver",

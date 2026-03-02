@@ -871,3 +871,118 @@ async def sync_folder(kb_name: str, folder_id: str, background_tasks: Background
         raise HTTPException(status_code=404, detail=f"Knowledge base '{kb_name}' not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{kb_name}/graph")
+async def get_knowledge_graph(kb_name: str):
+    """Return nodes and edges from the knowledge graph GraphML file."""
+    import xml.etree.ElementTree as ET
+
+    try:
+        manager = get_kb_manager()
+        kb_path = manager.get_knowledge_base_path(kb_name)
+        graphml_path = kb_path / "rag_storage" / "graph_chunk_entity_relation.graphml"
+
+        if not graphml_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail=f"Knowledge graph not found for '{kb_name}'. The KB may still be processing.",
+            )
+
+        tree = ET.parse(str(graphml_path))
+        root = tree.getroot()
+
+        # Detect the actual namespace from the root tag
+        ns_uri = ""
+        tag = root.tag
+        if tag.startswith("{"):
+            ns_uri = tag[1 : tag.index("}")]
+
+        # Build key_id -> attr_name mapping from <key> declarations
+        key_map: dict[str, str] = {}
+        if ns_uri:
+            key_els = root.findall(f"{{{ns_uri}}}key")
+        else:
+            key_els = root.findall("key")
+        for k in key_els:
+            kid = k.get("id", "")
+            attr_name = k.get("attr.name", "")
+            if kid and attr_name:
+                key_map[kid] = attr_name
+
+        # Find all nodes and edges
+        if ns_uri:
+            all_nodes_el = root.findall(f".//{{{ns_uri}}}node")
+            all_edges_el = root.findall(f".//{{{ns_uri}}}edge")
+            data_tag = f"{{{ns_uri}}}data"
+        else:
+            all_nodes_el = root.findall(".//node")
+            all_edges_el = root.findall(".//edge")
+            data_tag = "data"
+
+        def clean_sep(text: str) -> str:
+            """Remove <SEP> markers and clean up text."""
+            if not text:
+                return ""
+            return text.replace("<SEP>", " | ").strip()
+
+        def get_data_by_name(element, attr_name: str) -> str:
+            """Extract data value from a GraphML element by attr.name."""
+            for d in element.findall(data_tag):
+                kid = d.get("key", "")
+                if key_map.get(kid) == attr_name and d.text:
+                    return d.text.strip()
+            return ""
+
+        nodes = []
+        entity_types: dict[str, int] = {}
+        for node_el in all_nodes_el:
+            node_id = node_el.get("id", "")
+            label = get_data_by_name(node_el, "entity_id") or node_id
+            entity_type = get_data_by_name(node_el, "entity_type") or "concept"
+            description = clean_sep(get_data_by_name(node_el, "description"))
+
+            entity_type_lower = entity_type.lower()
+            entity_types[entity_type_lower] = entity_types.get(entity_type_lower, 0) + 1
+
+            nodes.append({
+                "id": node_id,
+                "label": clean_sep(label),
+                "type": entity_type_lower,
+                "description": description[:500] if description else "",
+            })
+
+        edges = []
+        for edge_el in all_edges_el:
+            source = edge_el.get("source", "")
+            target = edge_el.get("target", "")
+            label = get_data_by_name(edge_el, "description") or get_data_by_name(edge_el, "keywords") or ""
+            weight_str = get_data_by_name(edge_el, "weight") or "1.0"
+            try:
+                weight = float(weight_str)
+            except ValueError:
+                weight = 1.0
+
+            edges.append({
+                "source": source,
+                "target": target,
+                "label": clean_sep(label),
+                "weight": weight,
+            })
+
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "stats": {
+                "total_nodes": len(nodes),
+                "total_edges": len(edges),
+                "entity_types": entity_types,
+            },
+        }
+
+    except HTTPException:
+        raise
+    except ValueError:
+        raise HTTPException(status_code=404, detail=f"Knowledge base '{kb_name}' not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to parse knowledge graph: {str(e)}")
